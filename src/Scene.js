@@ -1,4 +1,4 @@
-import { vec3, mat4 } from './lib/gl-matrix.js';
+import {vec3, mat4} from './lib/gl-matrix.js';
 import getOptionsURL from './misc/getOptionsURL.js';
 import Enums from './misc/Enums.js';
 import Utils from './misc/Utils.js';
@@ -18,18 +18,24 @@ import Rtt from './drawables/Rtt.js';
 import ShaderLib from './render/ShaderLib.js';
 import MeshStatic from './mesh/meshStatic/MeshStatic.js';
 import WebGLCaps from './render/WebGLCaps.js';
+import * as nstructjs from './lib/nstructjs.js';
+
+let SceneIDGen = 0;
 
 class Scene {
 
   constructor() {
     this._gl = null; // webgl context
+    this._id = SceneIDGen++;
 
     this._cameraSpeed = 0.25;
 
     // cache canvas stuffs
     this._pixelRatio = 1.0;
     this._viewport = document.getElementById('viewport');
-    this._canvas = document.getElementById('canvas');
+    this._canvas = document.createElement("canvas");
+    this._canvas.id = "canvas";
+
     this._canvasWidth = 0;
     this._canvasHeight = 0;
     this._canvasOffsetLeft = 0;
@@ -46,7 +52,7 @@ class Scene {
     this._meshPreview = null;
     this._torusLength = 0.5;
     this._torusWidth = 0.1;
-    this._torusRadius = Math.PI * 2;
+    this._torusRadius = Math.PI*2;
     this._torusRadial = 32;
     this._torusTubular = 128;
 
@@ -75,8 +81,25 @@ class Scene {
     this._vertexSRGB = true; // srgb vs linear colorspace for vertex color
   }
 
+  destroyShaders() {
+    for (let shader of ShaderLib) {
+      shader.destroy(this._gl);
+    }
+  }
+
+  destroy() {
+    this.destroyShaders();
+    this._rttOpaque.destroy(this._gl);
+    this._rttMerge.destroy(this.gl);
+  }
+
   start() {
-    this.initWebGL();
+    this._viewport.appendChild(this._canvas);
+
+    if (!this._gl) {
+      this.initWebGL();
+    }
+
     if (!this._gl)
       return;
 
@@ -278,8 +301,9 @@ class Scene {
     if (showContour) {
       gl.bindFramebuffer(gl.FRAMEBUFFER, this._rttContour.getFramebuffer());
       gl.clear(gl.COLOR_BUFFER_BIT);
-      for (var s = 0, sel = this._selectMeshes, nbSel = sel.length; s < nbSel; ++s)
+      for (var s = 0, sel = this._selectMeshes, nbSel = sel.length; s < nbSel; ++s) {
         sel[s].renderFlatColor(this);
+      }
     }
     gl.enable(gl.DEPTH_TEST);
 
@@ -297,6 +321,7 @@ class Scene {
       if (meshes[i].isTransparent()) break;
       meshes[i].render(this);
     }
+
     var startTransparent = i;
     if (this._meshPreview) this._meshPreview.render(this);
 
@@ -363,10 +388,10 @@ class Scene {
   initWebGL() {
     var attributes = {
       antialias: false,
-      stencil: true
+      stencil  : true
     };
 
-    var canvas = document.getElementById('canvas');
+    var canvas = this._canvas;
     var gl = this._gl = canvas.getContext('webgl', attributes) || canvas.getContext('experimental-webgl', attributes);
     if (!gl) {
       window.alert('Could not initialise WebGL. No WebGL, no SculptGL. Sorry.');
@@ -413,8 +438,9 @@ class Scene {
       };
     };
 
-    for (var i = 0, mats = ShaderMatcap.matcaps, l = mats.length; i < l; ++i)
+    for (var i = 0, mats = ShaderMatcap.matcaps, l = mats.length; i < l; ++i) {
       loadTex(mats[i].path, i);
+    }
 
     this.initAlphaTextures();
   }
@@ -424,7 +450,7 @@ class Scene {
     var names = Picking.INIT_ALPHAS_NAMES;
     for (var i = 0, nbA = alphas.length; i < nbA; ++i) {
       var am = new Image();
-      am.src = 'resources/alpha/' + alphas[i];
+      am.src = 'app/resources/alpha/' + alphas[i];
       am.onload = this.onLoadAlphaImage.bind(this, am, names[i]);
     }
   }
@@ -432,8 +458,8 @@ class Scene {
   /** Called when the window is resized */
   onCanvasResize() {
     var viewport = this._viewport;
-    var newWidth = viewport.clientWidth * this._pixelRatio;
-    var newHeight = viewport.clientHeight * this._pixelRatio;
+    var newWidth = viewport.clientWidth*this._pixelRatio;
+    var newHeight = viewport.clientHeight*this._pixelRatio;
 
     this._canvasOffsetLeft = viewport.offsetLeft;
     this._canvasOffsetTop = viewport.offsetTop;
@@ -459,7 +485,7 @@ class Scene {
     var dx = box[3] - box[0];
     var dy = box[4] - box[1];
     var dz = box[5] - box[2];
-    return 0.5 * Math.sqrt(dx * dx + dy * dy + dz * dz);
+    return 0.5*Math.sqrt(dx*dx + dy*dy + dz*dz);
   }
 
   computeBoundingBoxMeshes(meshes) {
@@ -486,11 +512,11 @@ class Scene {
 
   normalizeAndCenterMeshes(meshes) {
     var box = this.computeBoundingBoxMeshes(meshes);
-    var scale = Utils.SCALE / vec3.dist([box[0], box[1], box[2]], [box[3], box[4], box[5]]);
+    var scale = Utils.SCALE/vec3.dist([box[0], box[1], box[2]], [box[3], box[4], box[5]]);
 
     var mCen = mat4.create();
     mat4.scale(mCen, mCen, [scale, scale, scale]);
-    mat4.translate(mCen, mCen, [-(box[0] + box[3]) * 0.5, -(box[1] + box[4]) * 0.5, -(box[2] + box[5]) * 0.5]);
+    mat4.translate(mCen, mCen, [-(box[0] + box[3])*0.5, -(box[1] + box[4])*0.5, -(box[2] + box[5])*0.5]);
 
     for (var i = 0, l = meshes.length; i < l; ++i) {
       var mat = meshes[i].getMatrix();
@@ -526,7 +552,7 @@ class Scene {
     var mesh = new Multimesh(Primitives.createTorus(this._gl, this._torusLength, this._torusWidth, this._torusRadius, this._torusRadial, this._torusTubular));
     if (preview) {
       mesh.setShowWireframe(true);
-      var scale = 0.3 * Utils.SCALE;
+      var scale = 0.3*Utils.SCALE;
       mat4.scale(mesh.getMatrix(), mesh.getMatrix(), [scale, scale, scale]);
       this._meshPreview = mesh;
       return;
@@ -538,8 +564,9 @@ class Scene {
 
   subdivideClamp(mesh, linear) {
     Subdivision.LINEAR = !!linear;
-    while (mesh.getNbFaces() < 50000)
+    while (mesh.getNbFaces() < 50000) {
       mesh.addLevel();
+    }
     // keep at max 4 multires
     mesh._meshes.splice(0, Math.min(mesh._meshes.length - 4, 4));
     mesh._sel = mesh._meshes.length - 1;
@@ -547,6 +574,7 @@ class Scene {
   }
 
   addNewMesh(mesh) {
+    console.log(Mesh);
     this._meshes.push(mesh);
     this._stateManager.pushStateAdd(mesh);
     this.setMesh(mesh);
@@ -572,6 +600,8 @@ class Scene {
       if (!this._vertexSRGB && mesh.getColors()) {
         Utils.convertArrayVec3toSRGB(mesh.getColors());
       }
+
+      console.warn(mesh);
 
       mesh.init();
       mesh.initRender();
@@ -608,8 +638,9 @@ class Scene {
 
   removeMeshes(rm) {
     var meshes = this._meshes;
-    for (var i = 0; i < rm.length; ++i)
+    for (var i = 0; i < rm.length; ++i) {
       meshes.splice(this.getIndexMesh(rm[i]), 1);
+    }
   }
 
   getIndexMesh(mesh, select) {
@@ -656,9 +687,10 @@ class Scene {
     var ctx = can.getContext('2d');
     ctx.drawImage(img, 0, 0);
     var u8rgba = ctx.getImageData(0, 0, img.width, img.height).data;
-    var u8lum = u8rgba.subarray(0, u8rgba.length / 4);
-    for (var i = 0, j = 0, n = u8lum.length; i < n; ++i, j += 4)
-      u8lum[i] = Math.round((u8rgba[j] + u8rgba[j + 1] + u8rgba[j + 2]) / 3);
+    var u8lum = u8rgba.subarray(0, u8rgba.length/4);
+    for (var i = 0, j = 0, n = u8lum.length; i < n; ++i, j += 4) {
+      u8lum[i] = Math.round((u8rgba[j] + u8rgba[j + 1] + u8rgba[j + 2])/3);
+    }
 
     name = Picking.addAlpha(u8lum, img.width, img.height, name)._name;
 
@@ -669,5 +701,21 @@ class Scene {
       tool._ctrlAlpha.setValue(name);
   }
 }
+
+Scene.STRUCT = `
+Scene {
+    _showGrid       : bool;
+    _showContour    : bool;
+    _meshes         : array(Mesh);
+    _mesh           : int | this._meshes.indexOf(this._mesh);
+    _preventRender  : bool;
+    _rttContour     : bool;
+    _rttMerge       : bool;
+    _rttOpaque      : bool;
+    _rttTransparent : bool;
+    _drawFullScene  : bool;
+}
+`;
+nstructjs.register(Scene);
 
 export default Scene;

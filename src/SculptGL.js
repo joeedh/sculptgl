@@ -1,6 +1,6 @@
 import './misc/Polyfill.js';
-import { vec3 } from './lib/gl-matrix.js';
-import { Manager as HammerManager, Pan, Pinch, Tap } from './lib/hammerjs.js';
+import {vec3} from './lib/gl-matrix.js';
+import {Manager as HammerManager, Pan, Pinch, Tap} from './lib/hammerjs.js';
 import Tablet from './misc/Tablet.js';
 import Enums from './misc/Enums.js';
 import Utils from './misc/Utils.js';
@@ -11,9 +11,10 @@ let MOUSE_LEFT = 1;
 let MOUSE_MIDDLE = 2;
 let MOUSE_RIGHT = 3;
 
+import * as nstructjs from './lib/nstructjs.js';
+
 // Manage events
 class SculptGL extends Scene {
-
   constructor() {
     super();
 
@@ -37,9 +38,39 @@ class SculptGL extends Scene {
     this._hammer = new HammerManager(this._canvas);
 
     this._eventProxy = {};
+    this.events = [];
 
     this.initHammer();
     this.addEvents();
+  }
+
+  destroy() {
+    for (let evt of this.events) {
+      evt[0].removeEventListener(evt[1], evt[2], evt[3]);
+    }
+
+    super.destroy();
+
+    this._canvas.remove();
+    this._gl = undefined;
+    this._canvas = undefined;
+
+    this.events = [];
+    this._hammer.destroy();
+    this._gui.destroy();
+  }
+
+  reset() {
+    this.destroy();
+
+    window._sculpt_app = new SculptGL();
+    window._sculpt_app.start();
+  }
+
+  addEvent(target, type, cb, options) {
+    this.events.push([target, type, cb, options]);
+
+    return target.addEventListener(type, cb, options);
   }
 
   addEvents() {
@@ -48,32 +79,34 @@ class SculptGL extends Scene {
     let cbMouseWheel = this.onMouseWheel.bind(this);
     let cbOnPointer = this.onPointer.bind(this);
 
+
     // pointer
-    canvas.addEventListener('pointerdown', cbOnPointer, false);
-    canvas.addEventListener('pointermove', cbOnPointer, false);
+    this.addEvent(canvas, 'pointerdown', cbOnPointer, false);
+    this.addEvent(canvas, 'pointermove', cbOnPointer, false);
 
     // mouse
-    canvas.addEventListener('mousedown', this.onMouseDown.bind(this), false);
-    canvas.addEventListener('mouseup', this.onMouseUp.bind(this), false);
-    canvas.addEventListener('mouseout', this.onMouseOut.bind(this), false);
-    canvas.addEventListener('mouseover', this.onMouseOver.bind(this), false);
-    canvas.addEventListener('mousemove', Utils.throttle(this.onMouseMove.bind(this), 16.66), false);
-    canvas.addEventListener('mousewheel', cbMouseWheel, false);
-    canvas.addEventListener('DOMMouseScroll', cbMouseWheel, false);
+    this.addEvent(canvas, 'mousedown', this.onMouseDown.bind(this), false);
+    this.addEvent(canvas, 'mouseup', this.onMouseUp.bind(this), false);
+    this.addEvent(canvas, 'mouseout', this.onMouseOut.bind(this), false);
+    this.addEvent(canvas, 'mouseover', this.onMouseOver.bind(this), false);
+    this.addEvent(canvas, 'mousemove', Utils.throttle(this.onMouseMove.bind(this), 16.66), false);
+    this.addEvent(canvas, 'mousewheel', cbMouseWheel, false);
+    this.addEvent(canvas, 'DOMMouseScroll', cbMouseWheel, false);
 
     //key
-    window.addEventListener('keydown', this.onKeyDown.bind(this), false);
-    window.addEventListener('keyup', this.onKeyUp.bind(this), false);
+    this.addEvent(window, 'keydown', this.onKeyDown.bind(this), false);
+    this.addEvent(window, 'keyup', this.onKeyUp.bind(this), false);
 
     let cbLoadFiles = this.loadFiles.bind(this);
     let cbStopAndPrevent = this.stopAndPrevent.bind(this);
     // misc
-    canvas.addEventListener('webglcontextlost', this.onContextLost.bind(this), false);
-    canvas.addEventListener('webglcontextrestored', this.onContextRestored.bind(this), false);
-    window.addEventListener('dragenter', cbStopAndPrevent, false);
-    window.addEventListener('dragover', cbStopAndPrevent, false);
-    window.addEventListener('drop', cbLoadFiles, false);
-    document.getElementById('fileopen').addEventListener('change', cbLoadFiles, false);
+    this.addEvent(canvas, 'webglcontextlost', this.onContextLost.bind(this), false);
+    this.addEvent(canvas, 'webglcontextrestored', this.onContextRestored.bind(this), false);
+    this.addEvent(window, 'dragenter', cbStopAndPrevent, false);
+    this.addEvent(window, 'dragover', cbStopAndPrevent, false);
+    this.addEvent(window, 'drop', cbLoadFiles, false);
+
+    this.addEvent(document.getElementById("fileopen"), "changed", cbLoadFiles, false);
   }
 
   onPointer(event) {
@@ -90,37 +123,37 @@ class SculptGL extends Scene {
     let hm = this._hammer;
     // double tap
     hm.add(new Tap({
-      event: 'doubletap',
-      pointers: 1,
-      taps: 2,
-      time: 250, // def : 250.  Maximum press time in ms.
-      interval: 450, // def : 300. Maximum time in ms between multiple taps.
-      threshold: 5, // def : 2. While doing a tap some small movement is allowed.
+      event       : 'doubletap',
+      pointers    : 1,
+      taps        : 2,
+      time        : 250, // def : 250.  Maximum press time in ms.
+      interval    : 450, // def : 300. Maximum time in ms between multiple taps.
+      threshold   : 5, // def : 2. While doing a tap some small movement is allowed.
       posThreshold: 50 // def : 30. The maximum position difference between multiple taps.
     }));
 
     // double tap 2 fingers
     hm.add(new Tap({
-      event: 'doubletap2fingers',
-      pointers: 2,
-      taps: 2,
-      time: 250,
-      interval: 450,
-      threshold: 5,
+      event       : 'doubletap2fingers',
+      pointers    : 2,
+      taps        : 2,
+      time        : 250,
+      interval    : 450,
+      threshold   : 5,
       posThreshold: 50
     }));
 
     // pan
     hm.add(new Pan({
-      event: 'pan',
-      pointers: 0,
+      event    : 'pan',
+      pointers : 0,
       threshold: 0
     }));
 
     // pinch
     hm.add(new Pinch({
-      event: 'pinch',
-      pointers: 2,
+      event    : 'pinch',
+      pointers : 2,
       threshold: 0.1 // Set a minimal thresold on pinch event, to be detected after pan
     }));
     hm.get('pinch').recognizeWith(hm.get('pan'));
@@ -260,7 +293,7 @@ class SculptGL extends Scene {
   }
 
   onPinchInOut(e) {
-    let dir = (e.scale - this._lastScale) * 25;
+    let dir = (e.scale - this._lastScale)*25;
     this._lastScale = e.scale;
     this.onDeviceWheel(dir);
   }
@@ -271,9 +304,9 @@ class SculptGL extends Scene {
     if (meshes.length > 0) {
       let pivot = [0.0, 0.0, 0.0];
       let box = this.computeBoundingBoxMeshes(meshes);
-      let zoom = 0.8 * this.computeRadiusFromBoundingBox(box);
+      let zoom = 0.8*this.computeRadiusFromBoundingBox(box);
       zoom *= this._camera.computeFrustumFit();
-      vec3.set(pivot, (box[0] + box[3]) * 0.5, (box[1] + box[4]) * 0.5, (box[2] + box[5]) * 0.5);
+      vec3.set(pivot, (box[0] + box[3])*0.5, (box[1] + box[4])*0.5, (box[2] + box[5])*0.5);
       this._camera.setAndFocusOnPivot(pivot, zoom);
     } else {
       this._camera.resetView();
@@ -396,7 +429,7 @@ class SculptGL extends Scene {
       this._isWheelingIn = true;
       this._camera.start(this._mouseX, this._mouseY);
     }
-    this._camera.zoom(dir * 0.02);
+    this._camera.zoom(dir*0.02);
     Multimesh.RENDER_HINT = Multimesh.CAMERA;
     this.render();
     // workaround for "end mouse wheel" event
@@ -412,8 +445,8 @@ class SculptGL extends Scene {
   }
 
   setMousePosition(event) {
-    this._mouseX = this._pixelRatio * (event.pageX - this._canvasOffsetLeft);
-    this._mouseY = this._pixelRatio * (event.pageY - this._canvasOffsetTop);
+    this._mouseX = this._pixelRatio*(event.pageX - this._canvasOffsetLeft);
+    this._mouseY = this._pixelRatio*(event.pageY - this._canvasOffsetTop);
   }
 
   onDeviceDown(event) {
@@ -456,7 +489,7 @@ class SculptGL extends Scene {
   }
 
   getSpeedFactor() {
-    return this._cameraSpeed / (this._canvasHeight * this.getPixelRatio());
+    return this._cameraSpeed/(this._canvasHeight*this.getPixelRatio());
   }
 
   onDeviceMove(event) {
@@ -472,13 +505,13 @@ class SculptGL extends Scene {
     if (action === Enums.Action.CAMERA_ZOOM || (action === Enums.Action.CAMERA_PAN_ZOOM_ALT && !event.altKey)) {
 
       Multimesh.RENDER_HINT = Multimesh.CAMERA;
-      this._camera.zoom((mouseX - this._lastMouseX + mouseY - this._lastMouseY) * speedFactor);
+      this._camera.zoom((mouseX - this._lastMouseX + mouseY - this._lastMouseY)*speedFactor);
       this.render();
 
     } else if (action === Enums.Action.CAMERA_PAN_ZOOM_ALT || action === Enums.Action.CAMERA_PAN) {
 
       Multimesh.RENDER_HINT = Multimesh.CAMERA;
-      this._camera.translate((mouseX - this._lastMouseX) * speedFactor, (mouseY - this._lastMouseY) * speedFactor);
+      this._camera.translate((mouseX - this._lastMouseX)*speedFactor, (mouseY - this._lastMouseY)*speedFactor);
       this.render();
 
     } else if (action === Enums.Action.CAMERA_ROTATE) {
@@ -505,6 +538,72 @@ class SculptGL extends Scene {
     this._lastMouseY = mouseY;
     this.renderSelectOverRtt();
   }
+
+  loadSTRUCT(reader) {
+    reader(this);
+  }
 }
+
+SculptGL.STRUCT = nstructjs.inherit(SculptGL, Scene) + `
+}
+`;
+nstructjs.register(SculptGL);
+
+class SculptFile {
+  static STRUCT = `
+  SculptFile {
+    magic           : static_string[8];
+    version         : int;
+    flags           : int;
+    structs         : string;
+    sculptgl_data   : array(byte);
+  }
+  `;
+
+  constructor() {
+    this.magic = "SCULPT_GL";
+    this.version = Enums.FILE_VERSION;
+    this.flags = 0;
+    this.structs = "";
+    this.sculptgl_data = [];
+  }
+
+  loadSTRUCT(reader) {
+    reader(this);
+  }
+
+  static writeFile(sculptgl) {
+    const data = [];
+    const file = new this();
+
+    file.structs = nstructjs.write_scripts();
+    nstructjs.writeObject(file.sculptgl_data, sculptgl);
+    nstructjs.writeObject(data, file);
+
+    return new Uint8Array(data);
+  }
+
+  static readFile(data) {
+    if (data instanceof Array) {
+      data = new Uint8Array(data);
+    }
+
+    let file = nstructjs.readObject(data, this);
+
+    let struct = new nstructjs.STRUCT();
+    struct.parse_structs(file.structs);
+
+    let gl = _sculpt_app._gl;
+
+    globalThis._sculpt_app.destroy();
+    globalThis._sculpt_app = struct.readObject(file.sculptgl_data, SculptGL);
+    globalThis._sculpt_app.start(gl);
+  }
+}
+
+nstructjs.register(SculptFile);
+window.SculptFile = SculptFile;
+
+nstructjs.validateStructs();
 
 export default SculptGL;

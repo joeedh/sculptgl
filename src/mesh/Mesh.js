@@ -24,6 +24,18 @@ let DEF_ROUGHNESS = 0.18; // 0.18;
 let DEF_METALNESS = 0.08; // 0.08;
 
 class Mesh {
+  static STRUCT = `
+Mesh {
+  _id            : int;
+  _meshData      : MeshData;
+  _isVisible     : bool;
+  _transformData : TransformData;
+}
+`;
+
+  loadSTRUCT(reader) {
+    reader(this);
+  }
 
   constructor() {
     this._id = Mesh.ID++; // useful id to retrieve a mesh (dynamic mesh, multires mesh, voxel mesh)
@@ -2351,5 +2363,9 @@ class Mesh {
 
 Mesh.OPTIMIZE = true;
 Mesh.ID = 0;
+
+import * as nstructjs from '../lib/nstructjs.js';
+
+nstructjs.register(Mesh);
 
 export default Mesh;

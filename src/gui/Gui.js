@@ -44,6 +44,11 @@ class Gui {
     this._xhrs = {};
   }
 
+  destroy() {
+    this._guiMain.domMain.remove();
+
+  }
+
   initGui() {
     this.deleteGui();
 

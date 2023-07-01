@@ -38,3 +38,5 @@ ShaderLib[Enums.Shader.PAINTUV] = ShaderPaintUV;
 ShaderLib[Enums.Shader.BLUR] = ShaderBlur;
 
 export default ShaderLib;
+
+window.ShaderLib = ShaderLib;

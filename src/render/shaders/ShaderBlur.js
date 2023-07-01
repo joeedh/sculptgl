@@ -43,6 +43,14 @@ ShaderBlur.fragment = [
   '}'
 ].join('\n');
 
+ShaderBlur.destroy = function(gl) {
+  ShaderBase.destroy.call(this, gl);
+
+  if (this.INPUT_TEXTURE) {
+    gl.deleteTexture(this.INPUT_TEXTURE.getTexture());
+  }
+}
+
 ShaderBlur.draw = function (rtt) {
   var gl = rtt.getGL();
   gl.useProgram(this.program);

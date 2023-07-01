@@ -95,6 +95,32 @@ var processShader = function (str) {
   return str;
 };
 
+ShaderBase.textures = {};
+
+ShaderBase.destroy = function (gl) {
+  if (!this.program) {
+    return;
+  }
+
+  gl.deleteProgram(this.program);
+  gl.deleteShader(this.fshader);
+  gl.deleteShader(this.vshader);
+
+
+  for (let k in this.textures) {
+    let tex = this.textures[k];
+    gl.deleteTexture(tex);
+  }
+
+  this.program = undefined;
+  this.vshader = undefined;
+  this.fshader = undefined;
+
+  this.textures = {};
+  this.uniforms = {};
+  this.attributes = {};
+}
+
 ShaderBase.getOrCreate = function (gl) {
   if (this.program)
     return this;
@@ -102,11 +128,11 @@ ShaderBase.getOrCreate = function (gl) {
   var vname = '\n#define SHADER_NAME ' + this.vertexName + '\n';
   var fname = '\n#define SHADER_NAME ' + this.fragmentName + '\n';
 
-  var vShader = gl.createShader(gl.VERTEX_SHADER);
+  var vShader = this.vshader = gl.createShader(gl.VERTEX_SHADER);
   gl.shaderSource(vShader, processShader(this.vertex + vname));
   gl.compileShader(vShader);
 
-  var fShader = gl.createShader(gl.FRAGMENT_SHADER);
+  var fShader = this.fshader = gl.createShader(gl.FRAGMENT_SHADER);
   gl.shaderSource(fShader, processShader(this.fragment + fname));
   gl.compileShader(fShader);
 
@@ -221,19 +247,19 @@ ShaderBase.onLoadTexture0 = function (gl, tex, main) {
 };
 
 ShaderBase.getDummyTexture = function (gl) {
-  if (this._dummyTex)
-    return this._dummyTex;
-  this._dummyTex = gl.createTexture();
-  gl.bindTexture(gl.TEXTURE_2D, this._dummyTex);
+  if (this.textures._dummyTex)
+    return this.textures._dummyTex;
+  this.textures._dummyTex = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D, this.textures._dummyTex);
   gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array(4));
   gl.bindTexture(gl.TEXTURE_2D, null);
-  return this._dummyTex;
+  return this.textures._dummyTex;
 };
 
 ShaderBase.getOrCreateTexture0 = function (gl, texPath, main) {
-  if (this.texture0 !== undefined)
-    return this.texture0;
-  this.texture0 = null; // trigger loading
+  if (this.textures.texture0 !== undefined)
+    return this.textures.texture0;
+  this.textures.texture0 = null; // trigger loading
   var tex = new Image();
   tex.src = texPath;
   tex.onload = this.onLoadTexture0.bind(this, gl, tex, main);

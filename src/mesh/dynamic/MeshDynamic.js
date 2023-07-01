@@ -3,7 +3,7 @@ import Utils from '../../misc/Utils.js';
 import Subdivision from './Subdivision.js';
 import Decimation from './Decimation.js';
 import Mesh from '../Mesh.js';
-import createMeshData from '../MeshData.js';
+import MeshData from '../MeshData.js';
 
 // Dynamic topology mesh (triangles only)
 // Obviously less performant than the static topology mesh
@@ -21,7 +21,7 @@ class MeshDynamic extends Mesh {
 
     this.setID(mesh.getID());
 
-    this._meshData = createMeshData();
+    this._meshData = new MeshData();
     this.setRenderData(mesh.getRenderData());
     this.setTransformData(mesh.getTransformData());
 

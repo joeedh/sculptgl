@@ -25,6 +25,13 @@ class Rtt {
     this.init();
   }
 
+  destroy(gl) {
+    if (singletonBuffer) {
+      singletonBuffer.release();
+      singletonBuffer = undefined;
+    }
+  }
+
   getGL() {
     return this._gl;
   }

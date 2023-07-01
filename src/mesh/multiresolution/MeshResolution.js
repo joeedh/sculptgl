@@ -1,15 +1,24 @@
 import Utils from '../../misc/Utils.js';
 import Subdivision from '../../editing/Subdivision.js';
 import Mesh from '../Mesh.js';
-import createMeshData from '../MeshData.js';
+import MeshData from '../MeshData.js';
+import * as nstructjs from '../../lib/nstructjs.js';
 
 class MeshResolution extends Mesh {
+  static
+  STRUCT = nstructjs.inherit(MeshResolution, Mesh) + `
+}
+  `;
+
+  loadSTRUCT(reader) {
+    super.loadSTRUCT(reader);
+  }
 
   constructor(mesh, keepMesh) {
     super();
 
     this.setID(mesh.getID());
-    this.setMeshData(keepMesh ? mesh.getMeshData() : createMeshData());
+    this.setMeshData(keepMesh ? mesh.getMeshData() : new MeshData());
     this.setRenderData(mesh.getRenderData());
     this.setTransformData(mesh.getTransformData());
 
@@ -289,5 +298,7 @@ class MeshResolution extends Mesh {
     }
   }
 }
+
+nstructjs.register(MeshResolution);
 
 export default MeshResolution;
