@@ -1,6 +1,6 @@
-import Selection from 'drawables/Selection';
-import Tools from 'editing/tools/Tools';
-import Enums from 'misc/Enums';
+import Selection from '../drawables/Selection.js';
+import Tools from './tools/Tools.js';
+import Enums from '../misc/Enums.js';
 
 class SculptManager {
 
@@ -47,23 +47,23 @@ class SculptManager {
   }
 
   init() {
-    var main = this._main;
-    var tools = this._tools;
-    for (var i = 0, nb = Tools.length; i < nb; ++i) {
+    let main = this._main;
+    let tools = this._tools;
+    for (let i = 0, nb = Tools.length; i < nb; ++i) {
       if (Tools[i]) tools[i] = new Tools[i](main);
     }
   }
 
   canBeContinuous() {
     switch (this._toolIndex) {
-    case Enums.Tools.TWIST:
-    case Enums.Tools.MOVE:
-    case Enums.Tools.DRAG:
-    case Enums.Tools.LOCALSCALE:
-    case Enums.Tools.TRANSFORM:
-      return false;
-    default:
-      return true;
+      case Enums.Tools.TWIST:
+      case Enums.Tools.MOVE:
+      case Enums.Tools.DRAG:
+      case Enums.Tools.LOCALSCALE:
+      case Enums.Tools.TRANSFORM:
+        return false;
+      default:
+        return true;
     }
   }
 
@@ -72,8 +72,8 @@ class SculptManager {
   }
 
   start(ctrl) {
-    var tool = this.getCurrentTool();
-    var canEdit = tool.start(ctrl);
+    let tool = this.getCurrentTool();
+    let canEdit = tool.start(ctrl);
     if (this._main.getPicking().getMesh() && this.isUsingContinuous())
       this._sculptTimer = window.setInterval(tool._cbContinuous, 16.6);
     return canEdit;

@@ -1,5 +1,5 @@
-import { vec3 } from 'gl-matrix';
-import Utils from 'misc/Utils';
+import { vec3 } from '../lib/gl-matrix/gl-matrix.js';
+import Utils from '../misc/Utils.js';
 
 class StateDynamic {
 

@@ -1,5 +1,5 @@
-import Tablet from 'misc/Tablet';
-import SculptBase from 'editing/tools/SculptBase';
+import Tablet from '../../misc/Tablet.js';
+import SculptBase from './SculptBase.js';
 
 class Inflate extends SculptBase {
 
@@ -15,8 +15,8 @@ class Inflate extends SculptBase {
   }
 
   stroke(picking) {
-    var iVertsInRadius = picking.getPickedVertices();
-    var intensity = this._intensity * Tablet.getPressureIntensity();
+    let iVertsInRadius = picking.getPickedVertices();
+    let intensity = this._intensity*Tablet.getPressureIntensity();
 
     this.updateProxy(iVertsInRadius);
     // undo-redo
@@ -30,46 +30,46 @@ class Inflate extends SculptBase {
     picking.setIdAlpha(this._idAlpha);
     this.inflate(iVertsInRadius, picking.getIntersectionPoint(), picking.getLocalRadius2(), intensity, picking);
 
-    var mesh = this.getMesh();
+    let mesh = this.getMesh();
     mesh.updateGeometry(mesh.getFacesFromVertices(iVertsInRadius), iVertsInRadius);
   }
 
   /** Inflate a group of vertices */
   inflate(iVerts, center, radiusSquared, intensity, picking) {
-    var mesh = this.getMesh();
-    var vAr = mesh.getVertices();
-    var mAr = mesh.getMaterials();
-    var vProxy = mesh.getVerticesProxy();
-    var nAr = mesh.getNormals();
-    var radius = Math.sqrt(radiusSquared);
-    var deformIntensity = intensity * radius * 0.1;
+    let mesh = this.getMesh();
+    let vAr = mesh.getVertices();
+    let mAr = mesh.getMaterials();
+    let vProxy = mesh.getVerticesProxy();
+    let nAr = mesh.getNormals();
+    let radius = Math.sqrt(radiusSquared);
+    let deformIntensity = intensity*radius*0.1;
     if (this._negative)
       deformIntensity = -deformIntensity;
-    var cx = center[0];
-    var cy = center[1];
-    var cz = center[2];
-    for (var i = 0, l = iVerts.length; i < l; ++i) {
-      var ind = iVerts[i] * 3;
-      var dx = vProxy[ind] - cx;
-      var dy = vProxy[ind + 1] - cy;
-      var dz = vProxy[ind + 2] - cz;
-      var dist = Math.sqrt(dx * dx + dy * dy + dz * dz) / radius;
+    let cx = center[0];
+    let cy = center[1];
+    let cz = center[2];
+    for (let i = 0, l = iVerts.length; i < l; ++i) {
+      let ind = iVerts[i]*3;
+      let dx = vProxy[ind] - cx;
+      let dy = vProxy[ind + 1] - cy;
+      let dz = vProxy[ind + 2] - cz;
+      let dist = Math.sqrt(dx*dx + dy*dy + dz*dz)/radius;
       if (dist >= 1.0)
         continue;
-      var fallOff = dist * dist;
-      fallOff = 3.0 * fallOff * fallOff - 4.0 * fallOff * dist + 1.0;
-      fallOff = deformIntensity * fallOff;
-      var vx = vAr[ind];
-      var vy = vAr[ind + 1];
-      var vz = vAr[ind + 2];
-      var nx = nAr[ind];
-      var ny = nAr[ind + 1];
-      var nz = nAr[ind + 2];
-      fallOff /= Math.sqrt(nx * nx + ny * ny + nz * nz);
-      fallOff *= mAr[ind + 2] * picking.getAlpha(vx, vy, vz);
-      vAr[ind] = vx + nx * fallOff;
-      vAr[ind + 1] = vy + ny * fallOff;
-      vAr[ind + 2] = vz + nz * fallOff;
+      let fallOff = dist*dist;
+      fallOff = 3.0*fallOff*fallOff - 4.0*fallOff*dist + 1.0;
+      fallOff = deformIntensity*fallOff;
+      let vx = vAr[ind];
+      let vy = vAr[ind + 1];
+      let vz = vAr[ind + 2];
+      let nx = nAr[ind];
+      let ny = nAr[ind + 1];
+      let nz = nAr[ind + 2];
+      fallOff /= Math.sqrt(nx*nx + ny*ny + nz*nz);
+      fallOff *= mAr[ind + 2]*picking.getAlpha(vx, vy, vz);
+      vAr[ind] = vx + nx*fallOff;
+      vAr[ind + 1] = vy + ny*fallOff;
+      vAr[ind + 2] = vz + nz*fallOff;
     }
   }
 }

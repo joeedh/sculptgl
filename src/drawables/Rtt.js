@@ -1,11 +1,10 @@
-import Buffer from 'render/Buffer';
-import Shader from 'render/ShaderLib';
-import WebGLCaps from 'render/WebGLCaps';
+import Buffer from '../render/Buffer.js';
+import Shader from '../render/ShaderLib.js';
+import WebGLCaps from '../render/WebGLCaps.js';
 
-var singletonBuffer;
+let singletonBuffer;
 
 class Rtt {
-
   constructor(gl, shaderName = null, depth = gl.createRenderbuffer(), halfFloat = false) {
     this._gl = gl; // webgl context
 
@@ -51,7 +50,7 @@ class Rtt {
   }
 
   init() {
-    var gl = this._gl;
+    let gl = this._gl;
 
     if (!singletonBuffer) {
       singletonBuffer = new Buffer(gl, gl.ARRAY_BUFFER, gl.STATIC_DRAW);
@@ -70,19 +69,19 @@ class Rtt {
   }
 
   onResize(width, height) {
-    var gl = this._gl;
+    let gl = this._gl;
 
-    this._invSize[0] = 1.0 / width;
-    this._invSize[1] = 1.0 / height;
+    this._invSize[0] = 1.0/width;
+    this._invSize[1] = 1.0/height;
 
     gl.bindTexture(gl.TEXTURE_2D, this._texture);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, this._type, null);
 
-    var filter = this._filterNearest ? gl.NEAREST : gl.LINEAR;
+    let filter = this._filterNearest ? gl.NEAREST : gl.LINEAR;
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, filter);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, filter);
 
-    var wrap = this._wrapRepeat ? gl.REPEAT : gl.CLAMP_TO_EDGE;
+    let wrap = this._wrapRepeat ? gl.REPEAT : gl.CLAMP_TO_EDGE;
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, wrap);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, wrap);
 

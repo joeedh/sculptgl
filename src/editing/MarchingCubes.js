@@ -1,9 +1,9 @@
-import Utils from 'misc/Utils';
+import Utils from '../misc/Utils.js';
 
-var MarchingCubes = {};
+let MarchingCubes = {};
 MarchingCubes.BLOCK = false;
 
-var edgeTable = new Uint32Array([
+let edgeTable = new Uint32Array([
     0x0,
     0x109,
     0x203,
@@ -544,31 +544,31 @@ var edgeTable = new Uint32Array([
     [3, 7]
   ];
 
-var readScalarValues = function (voxels, grid, dims, n, cols, mats) {
-  var colors = voxels.colorField;
-  var materials = voxels.materialField;
-  var data = voxels.distanceField;
+let readScalarValues = function (voxels, grid, dims, n, cols, mats) {
+  let colors = voxels.colorField;
+  let materials = voxels.materialField;
+  let data = voxels.distanceField;
 
   // Read in 8 field values around this vertex and store them in an array
   // Also calculate 8-bit mask, like in marching cubes, so we can speed up sign checks later
-  var c1 = 0;
-  var c2 = 0;
-  var c3 = 0;
-  var m1 = 0;
-  var m2 = 0;
-  var m3 = 0;
-  var invSum = 0;
+  let c1 = 0;
+  let c2 = 0;
+  let c3 = 0;
+  let m1 = 0;
+  let m2 = 0;
+  let m3 = 0;
+  let invSum = 0;
 
-  var mask = 0;
-  var rx = dims[0];
-  var rxy = dims[0] * dims[1];
+  let mask = 0;
+  let rx = dims[0];
+  let rxy = dims[0] * dims[1];
 
-  for (var i = 0; i < 8; ++i) {
-    var v = cubeVerts[i];
-    var id = n + v[0] + v[1] * rx + v[2] * rxy;
+  for (let i = 0; i < 8; ++i) {
+    let v = cubeVerts[i];
+    let id = n + v[0] + v[1] * rx + v[2] * rxy;
 
-    var id3 = id * 3;
-    var p = data[id];
+    let id3 = id * 3;
+    let p = data[id];
     grid[i] = p;
     mask |= p > 0.0 ? 1 << i : 0;
     if (p !== Infinity) {
@@ -599,55 +599,55 @@ var readScalarValues = function (voxels, grid, dims, n, cols, mats) {
 };
 
 MarchingCubes.computeSurface = function (voxels) {
-  var dims = voxels.dims;
+  let dims = voxels.dims;
 
-  var mapVertices = new Map();
+  let mapVertices = new Map();
 
-  var vertices = [];
-  var cols = [];
-  var mats = [];
-  var faces = [];
-  var n = 0;
-  var x = new Int32Array(3);
-  var grid = new Float32Array(8);
+  let vertices = [];
+  let cols = [];
+  let mats = [];
+  let faces = [];
+  let n = 0;
+  let x = new Int32Array(3);
+  let grid = new Float32Array(8);
 
-  var edges = new Array(12);
+  let edges = new Array(12);
 
-  var tmpV = new Float32Array(3);
-  var tmpC = new Float32Array(3);
-  var tmpM = new Float32Array(3);
+  let tmpV = new Float32Array(3);
+  let tmpC = new Float32Array(3);
+  let tmpM = new Float32Array(3);
 
   //March over the voxel grid
   for (x[2] = 0; x[2] < dims[2] - 1; ++x[2], n += dims[0]) {
     for (x[1] = 0; x[1] < dims[1] - 1; ++x[1], ++n) {
       for (x[0] = 0; x[0] < dims[0] - 1; ++x[0], ++n) {
-        var cubeIndex = readScalarValues(voxels, grid, dims, n, tmpC, tmpM);
+        let cubeIndex = readScalarValues(voxels, grid, dims, n, tmpC, tmpM);
 
-        var edgeMask = edgeTable[cubeIndex];
+        let edgeMask = edgeTable[cubeIndex];
         if (edgeMask === 0) {
           continue;
         }
 
-        for (var k = 0; k < 12; ++k) {
+        for (let k = 0; k < 12; ++k) {
           if (!(edgeMask & (1 << k))) continue;
 
-          var e = edgeIndex[k];
-          var p0 = cubeVerts[e[0]];
-          var p1 = cubeVerts[e[1]];
-          var a = grid[e[0]];
-          var b = grid[e[1]];
-          var d = a - b;
-          var t = 0;
+          let e = edgeIndex[k];
+          let p0 = cubeVerts[e[0]];
+          let p1 = cubeVerts[e[1]];
+          let a = grid[e[0]];
+          let b = grid[e[1]];
+          let d = a - b;
+          let t = 0;
           if (Math.abs(d) > 1e-6) {
             t = a / d;
           }
 
-          for (var h = 0; h < 3; ++h) {
+          for (let h = 0; h < 3; ++h) {
             tmpV[h] = x[h] + p0[h] + t * (p1[h] - p0[h]);
           }
 
-          var hash = tmpV[0] + '+' + tmpV[1] + '+' + tmpV[2];
-          var idVertex = mapVertices.get(hash);
+          let hash = tmpV[0] + '+' + tmpV[1] + '+' + tmpV[2];
+          let idVertex = mapVertices.get(hash);
 
           if (idVertex >= 0) {
             edges[k] = idVertex;
@@ -660,8 +660,8 @@ MarchingCubes.computeSurface = function (voxels) {
           }
         }
 
-        var f = triTable[cubeIndex];
-        for (var l = 0; l < f.length; l += 3) {
+        let f = triTable[cubeIndex];
+        for (let l = 0; l < f.length; l += 3) {
           faces.push(edges[f[l]], edges[f[l + 1]], edges[f[l + 2]], Utils.TRI_INDEX);
         }
       }

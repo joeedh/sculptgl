@@ -1,16 +1,27 @@
 // polyfills stuffs
 
-if (!window.Map) {
-  window.Map = function () {
-    this.map = {};
-  };
-  window.Map.prototype = {
-    set: function (key, value) {
-      this.map[key] = value;
-    },
-    get: function (key) {
-      return this.map[key];
+if (!Array.prototype.remove) {
+  Array.prototype.remove = function(item, throw_error=true) {
+    let i = this.indexOf(item);
+
+    if (i < 0) {
+      if (throw_error) {
+        console.error("Item not in array:", item);
+        throw new Error("item not in array:" + item);
+      } else {
+        console.warn("Item not in array:", item);
+      }
+
+      return;
     }
+
+    while (i < this.length - 1) {
+      this[i] = this[i+1];
+      i++;
+    }
+
+    this[i] = undefined;
+    this.length--;
   };
 }
 

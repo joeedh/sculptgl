@@ -1,8 +1,7 @@
-import Tablet from 'misc/Tablet';
-import SculptBase from 'editing/tools/SculptBase';
+import Tablet from '../../misc/Tablet.js';
+import SculptBase from './SculptBase.js';
 
 class Crease extends SculptBase {
-
   constructor(main) {
     super(main);
 
@@ -15,8 +14,8 @@ class Crease extends SculptBase {
   }
 
   stroke(picking) {
-    var iVertsInRadius = picking.getPickedVertices();
-    var intensity = this._intensity * Tablet.getPressureIntensity();
+    let iVertsInRadius = picking.getPickedVertices();
+    let intensity = this._intensity*Tablet.getPressureIntensity();
 
     this.updateProxy(iVertsInRadius);
     // undo-redo
@@ -30,46 +29,46 @@ class Crease extends SculptBase {
     picking.setIdAlpha(this._idAlpha);
     this.crease(iVertsInRadius, picking.getPickedNormal(), picking.getIntersectionPoint(), picking.getLocalRadius2(), intensity, picking);
 
-    var mesh = this.getMesh();
+    let mesh = this.getMesh();
     mesh.updateGeometry(mesh.getFacesFromVertices(iVertsInRadius), iVertsInRadius);
   }
 
   /** Pinch+brush-like sculpt */
   crease(iVertsInRadius, aNormal, center, radiusSquared, intensity, picking) {
-    var mesh = this.getMesh();
-    var vAr = mesh.getVertices();
-    var mAr = mesh.getMaterials();
-    var vProxy = mesh.getVerticesProxy();
-    var radius = Math.sqrt(radiusSquared);
-    var cx = center[0];
-    var cy = center[1];
-    var cz = center[2];
-    var anx = aNormal[0];
-    var any = aNormal[1];
-    var anz = aNormal[2];
-    var deformIntensity = intensity * 0.07;
-    var brushFactor = deformIntensity * radius;
+    let mesh = this.getMesh();
+    let vAr = mesh.getVertices();
+    let mAr = mesh.getMaterials();
+    let vProxy = mesh.getVerticesProxy();
+    let radius = Math.sqrt(radiusSquared);
+    let cx = center[0];
+    let cy = center[1];
+    let cz = center[2];
+    let anx = aNormal[0];
+    let any = aNormal[1];
+    let anz = aNormal[2];
+    let deformIntensity = intensity*0.07;
+    let brushFactor = deformIntensity*radius;
     if (this._negative)
       brushFactor = -brushFactor;
-    for (var i = 0, l = iVertsInRadius.length; i < l; ++i) {
-      var ind = iVertsInRadius[i] * 3;
-      var dx = cx - vProxy[ind];
-      var dy = cy - vProxy[ind + 1];
-      var dz = cz - vProxy[ind + 2];
-      var dist = Math.sqrt(dx * dx + dy * dy + dz * dz) / radius;
+    for (let i = 0, l = iVertsInRadius.length; i < l; ++i) {
+      let ind = iVertsInRadius[i]*3;
+      let dx = cx - vProxy[ind];
+      let dy = cy - vProxy[ind + 1];
+      let dz = cz - vProxy[ind + 2];
+      let dist = Math.sqrt(dx*dx + dy*dy + dz*dz)/radius;
       if (dist >= 1.0)
         continue;
-      var vx = vAr[ind];
-      var vy = vAr[ind + 1];
-      var vz = vAr[ind + 2];
-      var fallOff = dist * dist;
-      fallOff = 3.0 * fallOff * fallOff - 4.0 * fallOff * dist + 1.0;
-      fallOff *= mAr[ind + 2] * picking.getAlpha(vx, vy, vz);
-      var brushModifier = Math.pow(fallOff, 5) * brushFactor;
+      let vx = vAr[ind];
+      let vy = vAr[ind + 1];
+      let vz = vAr[ind + 2];
+      let fallOff = dist*dist;
+      fallOff = 3.0*fallOff*fallOff - 4.0*fallOff*dist + 1.0;
+      fallOff *= mAr[ind + 2]*picking.getAlpha(vx, vy, vz);
+      let brushModifier = Math.pow(fallOff, 5)*brushFactor;
       fallOff *= deformIntensity;
-      vAr[ind] = vx + dx * fallOff + anx * brushModifier;
-      vAr[ind + 1] = vy + dy * fallOff + any * brushModifier;
-      vAr[ind + 2] = vz + dz * fallOff + anz * brushModifier;
+      vAr[ind] = vx + dx*fallOff + anx*brushModifier;
+      vAr[ind + 1] = vy + dy*fallOff + any*brushModifier;
+      vAr[ind + 2] = vz + dz*fallOff + anz*brushModifier;
     }
   }
 }

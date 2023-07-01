@@ -1,19 +1,19 @@
-import yagui from 'yagui';
-import TR from 'gui/GuiTR';
-import GuiBackground from 'gui/GuiBackground';
-import GuiCamera from 'gui/GuiCamera';
-import GuiConfig from 'gui/GuiConfig';
-import GuiFiles from 'gui/GuiFiles';
-import GuiMesh from 'gui/GuiMesh';
-import GuiTopology from 'gui/GuiTopology';
-import GuiRendering from 'gui/GuiRendering';
-import GuiScene from 'gui/GuiScene';
-import GuiSculpting from 'gui/GuiSculpting';
-import GuiStates from 'gui/GuiStates';
-import GuiTablet from 'gui/GuiTablet';
-import ShaderContour from 'render/shaders/ShaderContour';
+import yagui from '../lib/yagui.js';
+import TR from './GuiTR.js';
+import GuiBackground from './GuiBackground.js';
+import GuiCamera from './GuiCamera.js';
+import GuiConfig from './GuiConfig.js';
+import GuiFiles from './GuiFiles.js';
+import GuiMesh from './GuiMesh.js';
+import GuiTopology from './GuiTopology.js';
+import GuiRendering from './GuiRendering.js';
+import GuiScene from './GuiScene.js';
+import GuiSculpting from './GuiSculpting.js';
+import GuiStates from './GuiStates.js';
+import GuiTablet from './GuiTablet.js';
+import ShaderContour from '../render/shaders/ShaderContour.js';
 
-import Export from 'files/Export';
+import Export from '../files/Export.js';
 
 class Gui {
 
@@ -49,9 +49,9 @@ class Gui {
 
     this._guiMain = new yagui.GuiMain(this._main.getViewport(), this._main.onCanvasResize.bind(this._main));
 
-    var ctrls = this._ctrls;
+    let ctrls = this._ctrls;
     ctrls.length = 0;
-    var idc = 0;
+    let idc = 0;
 
     // Initialize the topbar
     this._topbar = this._guiMain.addTopbar();
@@ -73,7 +73,7 @@ class Gui {
     ctrls[idc++] = this._ctrlSculpting = new GuiSculpting(this._sidebar, this);
 
     // gui extra
-    var extra = this._topbar.addExtra();
+    let extra = this._topbar.addExtra();
     // Extra : Настройка интерфейса
     extra.addTitle(TR('contour'));
     extra.addColor(TR('contourColor'), ShaderContour.color, this.onContourColor.bind(this));
@@ -90,7 +90,7 @@ class Gui {
   }
 
   getNotification(notifName) {
-    var notif = this._notifications[notifName];
+    let notif = this._notifications[notifName];
     if (!notif) {
       notif = this._topbar.addMenu();
       notif.isVisible = function () {
@@ -121,7 +121,7 @@ class Gui {
   }
 
   initPrint(guiParent) {
-    var menu = guiParent.addMenu('Print it!');
+    let menu = guiParent.addMenu('Print it!');
     // menu.addButton('with Sculpteo', this, 'exportSculpteo');
     menu.addButton('Go to Materialise!', this, 'exportMaterialise');
   }
@@ -141,13 +141,13 @@ class Gui {
   }
 
   _export(notifName) {
-    var mesh = this._main.getMesh();
+    let mesh = this._main.getMesh();
     if (!mesh) return;
 
-    var notif = this.getNotification(notifName);
+    let notif = this.getNotification(notifName);
     if (!notif) return;
 
-    var fName = 'export' + notifName.charAt(0).toUpperCase() + notifName.slice(1);
+    let fName = 'export' + notifName.charAt(0).toUpperCase() + notifName.slice(1);
     this._xhrs[notifName] = Export[fName](this._main, notif);
   }
 
@@ -165,7 +165,7 @@ class Gui {
   }
 
   addAboutButton() {
-    var ctrlAbout = this._topbar.addMenu();
+    let ctrlAbout = this._topbar.addMenu();
     ctrlAbout.domContainer.innerHTML = TR('about');
     ctrlAbout.domContainer.addEventListener('mousedown', function () {
       window.open('http://stephaneginier.com', '_blank');
@@ -213,8 +213,8 @@ class Gui {
   }
 
   callFunc(func, event) {
-    for (var i = 0, ctrls = this._ctrls, nb = ctrls.length; i < nb; ++i) {
-      var ct = ctrls[i];
+    for (let i = 0, ctrls = this._ctrls, nb = ctrls.length; i < nb; ++i) {
+      let ct = ctrls[i];
       if (ct && ct[func])
         ct[func](event);
     }

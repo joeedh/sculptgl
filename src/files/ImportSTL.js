@@ -1,34 +1,34 @@
-import Utils from 'misc/Utils';
-import MeshStatic from 'mesh/meshStatic/MeshStatic';
+import Utils from '../misc/Utils.js';
+import MeshStatic from '../mesh/meshStatic/MeshStatic.js';
 
 var Import = {};
 
 /** Import STL file */
 Import.importSTL = function (buffer, gl) {
   var nbTriangles = new Uint32Array(buffer, 80, 1)[0] || 0;
-  var isBinary = 84 + (nbTriangles * 50) === buffer.byteLength;
+  var isBinary = 84 + (nbTriangles*50) === buffer.byteLength;
   var vb = isBinary ? Import.importBinarySTL(buffer, nbTriangles) : Import.importAsciiSTL(Utils.ab2str(buffer));
   var vbc;
   if (isBinary) {
     vbc = vb[1];
     vb = vb[0];
   }
-  nbTriangles = vb.length / 9;
+  nbTriangles = vb.length/9;
   var mapVertices = new Map();
   var nbVertices = [0];
-  var iAr = new Uint32Array(nbTriangles * 4);
+  var iAr = new Uint32Array(nbTriangles*4);
   for (var i = 0; i < nbTriangles; ++i) {
-    var idt = i * 4;
-    var idv = i * 9;
+    var idt = i*4;
+    var idv = i*9;
     iAr[idt] = Import.detectNewVertex(mapVertices, vb, vbc, idv, nbVertices);
     iAr[idt + 1] = Import.detectNewVertex(mapVertices, vb, vbc, idv + 3, nbVertices);
     iAr[idt + 2] = Import.detectNewVertex(mapVertices, vb, vbc, idv + 6, nbVertices);
     iAr[idt + 3] = Utils.TRI_INDEX;
   }
   var mesh = new MeshStatic(gl);
-  mesh.setVertices(vb.subarray(0, nbVertices[0] * 3));
+  mesh.setVertices(vb.subarray(0, nbVertices[0]*3));
   if (vbc)
-    mesh.setColors(vbc.subarray(0, nbVertices[0] * 3));
+    mesh.setColors(vbc.subarray(0, nbVertices[0]*3));
   mesh.setFaces(iAr);
   return [mesh];
 };
@@ -43,7 +43,7 @@ Import.detectNewVertex = function (mapVertices, vb, vbc, start, nbVertices) {
   if (idVertex === undefined) {
     idVertex = nbVertices[0];
     mapVertices.set(hash, idVertex);
-    var id = idVertex * 3;
+    var id = idVertex*3;
     vb[id] = x;
     vb[id + 1] = y;
     vb[id + 2] = z;
@@ -61,7 +61,7 @@ Import.detectNewVertex = function (mapVertices, vb, vbc, start, nbVertices) {
 Import.importAsciiSTL = function (data) {
   var lines = data.split('\n');
   var nbLength = lines.length;
-  var vb = new Float32Array(Math.ceil(nbLength * 9 / 7));
+  var vb = new Float32Array(Math.ceil(nbLength*9/7));
   var acc = 0;
   for (var i = 0; i < nbLength; ++i) {
     var line = lines[i].trim();
@@ -91,8 +91,8 @@ Import.importBinarySTL = function (buffer, nbTriangles) {
   var colorMagic = String.fromCharCode.apply(null, dataHeader).indexOf('COLOR=') !== -1;
 
   var i = 0;
-  var vb = new Uint8Array(nbTriangles * 36);
-  var vbc = new Uint8Array(nbTriangles * 2);
+  var vb = new Uint8Array(nbTriangles*36);
+  var vbc = new Uint8Array(nbTriangles*2);
   var offset = 96;
   var j = 0;
   var jc = 0;
@@ -106,10 +106,10 @@ Import.importBinarySTL = function (buffer, nbTriangles) {
   }
 
   var uc = new Uint16Array(vbc.buffer);
-  vbc = new Float32Array(nbTriangles * 9);
-  var inv = 1.0 / 31;
+  vbc = new Float32Array(nbTriangles*9);
+  var inv = 1.0/31;
   for (i = 0; i < nbTriangles; ++i) {
-    j = i * 9;
+    j = i*9;
     var u = uc[i];
 
     var r = 1.0;
@@ -121,15 +121,15 @@ Import.importBinarySTL = function (buffer, nbTriangles) {
     if (colorMagic) {
       // Materialise Magics
       if (!bit15) {
-        r = ((u & 31) & 31) * inv;
-        g = ((u >> 5) & 31) * inv;
-        b = ((u >> 10) & 31) * inv;
+        r = ((u & 31) & 31)*inv;
+        g = ((u>>5) & 31)*inv;
+        b = ((u>>10) & 31)*inv;
       }
     } else if (bit15) {
       // VisCAM and SolidView 
-      r = ((u >> 10) & 31) * inv;
-      g = ((u >> 5) & 31) * inv;
-      b = ((u & 31) & 31) * inv;
+      r = ((u>>10) & 31)*inv;
+      g = ((u>>5) & 31)*inv;
+      b = ((u & 31) & 31)*inv;
     }
 
     vbc[j] = vbc[j + 3] = vbc[j + 6] = r;

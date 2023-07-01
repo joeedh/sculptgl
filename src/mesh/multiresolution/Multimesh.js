@@ -1,20 +1,23 @@
-import MeshResolution from 'mesh/multiresolution/MeshResolution';
-import Mesh from 'mesh/Mesh';
-import Buffer from 'render/Buffer';
-import Subdivision from 'editing/Subdivision';
-import Reversion from 'editing/Reversion';
+import MeshResolution from './MeshResolution.js';
+import Mesh from '../Mesh.js';
+import Buffer from '../../render/Buffer.js';
+import Subdivision from '../../editing/Subdivision.js';
+import Reversion from '../../editing/Reversion.js';
 
 class Multimesh extends Mesh {
 
   static get NONE() {
     return 0;
   }
+
   static get SCULPT() {
     return 1;
   }
+
   static get CAMERA() {
     return 2;
   }
+
   static get PICKING() {
     return 3;
   }
@@ -48,7 +51,7 @@ class Multimesh extends Mesh {
       return this.getCurrentMesh();
 
     var nbFaces = this.getCurrentMesh().getNbFaces();
-    var strTimer = 'addLevel : ' + nbFaces + ' -> ' + nbFaces * 4;
+    var strTimer = 'addLevel : ' + nbFaces + ' -> ' + nbFaces*4;
     console.time(strTimer);
 
     var baseMesh = this.getCurrentMesh();

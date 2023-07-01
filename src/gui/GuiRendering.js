@@ -1,13 +1,13 @@
-import TR from 'gui/GuiTR';
-import RenderData from 'mesh/RenderData';
-import Shader from 'render/ShaderLib';
-import getOptionsURL from 'misc/getOptionsURL';
-import Enums from 'misc/Enums';
+import TR from './GuiTR.js';
+import RenderData from '../mesh/RenderData.js';
+import Shader from '../render/ShaderLib.js';
+import getOptionsURL from '../misc/getOptionsURL.js';
+import Enums from '../misc/Enums.js';
 
-var ShaderMERGE = Shader[Enums.Shader.MERGE];
-var ShaderUV = Shader[Enums.Shader.UV];
-var ShaderPBR = Shader[Enums.Shader.PBR];
-var ShaderMatcap = Shader[Enums.Shader.MATCAP];
+let ShaderMERGE = Shader[Enums.Shader.MERGE];
+let ShaderUV = Shader[Enums.Shader.UV];
+let ShaderPBR = Shader[Enums.Shader.PBR];
+let ShaderMatcap = Shader[Enums.Shader.MATCAP];
 
 class GuiRendering {
 
@@ -26,11 +26,11 @@ class GuiRendering {
   }
 
   init(guiParent) {
-    var menu = this._menu = guiParent.addMenu(TR('renderingTitle'));
+    let menu = this._menu = guiParent.addMenu(TR('renderingTitle'));
     menu.close();
 
     // shader selection
-    var optionsShaders = [];
+    let optionsShaders = [];
     optionsShaders[Enums.Shader.MATCAP] = TR('renderingMatcap');
     optionsShaders[Enums.Shader.PBR] = TR('renderingPBR');
     optionsShaders[Enums.Shader.NORMAL] = TR('renderingNormal');
@@ -45,16 +45,18 @@ class GuiRendering {
     this._ctrlFilmic = menu.addCheckbox(TR('renderingFilmic'), ShaderMERGE.FILMIC, this.onFilmic.bind(this));
 
     // environments
-    var optionEnvs = {};
-    for (var i = 0, envs = ShaderPBR.environments, l = envs.length; i < l; ++i)
+    let optionEnvs = {};
+    for (let i = 0, envs = ShaderPBR.environments, l = envs.length; i < l; ++i) {
       optionEnvs[i] = envs[i].name;
+    }
     this._ctrlEnvTitle = menu.addTitle(TR('renderingEnvironment'));
     this._ctrlEnv = menu.addCombobox('', ShaderPBR.idEnv, this.onEnvironmentChanged.bind(this), optionEnvs);
 
     // matcap texture
-    var optionMatcaps = {};
-    for (var j = 0, mats = ShaderMatcap.matcaps, k = mats.length; j < k; ++j)
+    let optionMatcaps = {};
+    for (let j = 0, mats = ShaderMatcap.matcaps, k = mats.length; j < k; ++j) {
       optionMatcaps[j] = mats[j].name;
+    }
     this._ctrlMatcapTitle = menu.addTitle(TR('renderingMaterial'));
     this._ctrlMatcap = menu.addCombobox(TR('renderingMatcap'), 0, this.onMatcapChanged.bind(this), optionMatcaps);
 
@@ -88,7 +90,7 @@ class GuiRendering {
 
   onCurvatureChanged(val) {
     if (!this._main.getMesh()) return;
-    this._main.getMesh().setCurvature(val / 20.0);
+    this._main.getMesh().setCurvature(val/20.0);
     this._main.render();
   }
 
@@ -108,20 +110,20 @@ class GuiRendering {
   }
 
   onTransparencyChanged(val) {
-    var meshes = this._main.getSelectedMeshes();
-    for (var i = 0, nb = meshes.length; i < nb; ++i) {
-      meshes[i].setOpacity(1.0 - val / 100.0);
+    let meshes = this._main.getSelectedMeshes();
+    for (let i = 0, nb = meshes.length; i < nb; ++i) {
+      meshes[i].setOpacity(1.0 - val/100.0);
     }
     this._main.render();
   }
 
   onShaderChanged(val) {
-    var main = this._main;
+    let main = this._main;
 
-    var warning = false;
-    var meshes = this._main.getSelectedMeshes();
-    for (var i = 0, nb = meshes.length; i < nb; ++i) {
-      var mesh = meshes[i];
+    let warning = false;
+    let meshes = this._main.getSelectedMeshes();
+    for (let i = 0, nb = meshes.length; i < nb; ++i) {
+      let mesh = meshes[i];
 
       if (mesh) {
         if (val === Enums.Shader.UV && !mesh.hasUV()) {
@@ -141,9 +143,9 @@ class GuiRendering {
   }
 
   onMatcapChanged(value) {
-    var meshes = this._main.getSelectedMeshes();
-    for (var i = 0, nb = meshes.length; i < nb; ++i) {
-      var mesh = meshes[i];
+    let meshes = this._main.getSelectedMeshes();
+    for (let i = 0, nb = meshes.length; i < nb; ++i) {
+      let mesh = meshes[i];
       if (mesh.getShaderType() !== Enums.Shader.MATCAP)
         mesh.setShaderType(Enums.Shader.MATCAP);
       mesh.setMatcap(value);
@@ -152,24 +154,24 @@ class GuiRendering {
   }
 
   onFlatShading(bool) {
-    var meshes = this._main.getSelectedMeshes();
-    for (var i = 0, nb = meshes.length; i < nb; ++i) {
+    let meshes = this._main.getSelectedMeshes();
+    for (let i = 0, nb = meshes.length; i < nb; ++i) {
       meshes[i].setFlatShading(bool);
     }
     this._main.render();
   }
 
   onShowWireframe(bool) {
-    var meshes = this._main.getSelectedMeshes();
-    for (var i = 0, nb = meshes.length; i < nb; ++i) {
+    let meshes = this._main.getSelectedMeshes();
+    for (let i = 0, nb = meshes.length; i < nb; ++i) {
       meshes[i].setShowWireframe(bool);
     }
     this._main.render();
   }
 
   addEvents() {
-    var cbLoadTex = this.loadTextureUV.bind(this);
-    var cbLoadMatcap = this.loadMatcap.bind(this);
+    let cbLoadTex = this.loadTextureUV.bind(this);
+    let cbLoadMatcap = this.loadMatcap.bind(this);
     document.getElementById('textureopen').addEventListener('change', cbLoadTex, false);
     document.getElementById('matcapopen').addEventListener('change', cbLoadMatcap, false);
 
@@ -184,7 +186,7 @@ class GuiRendering {
   }
 
   updateMesh() {
-    var mesh = this._main.getMesh();
+    let mesh = this._main.getMesh();
     if (!mesh) {
       this._menu.setVisibility(false);
       return;
@@ -195,15 +197,15 @@ class GuiRendering {
     this._ctrlFlatShading.setValue(mesh.getFlatShading(), true);
     this._ctrlShowWireframe.setValue(mesh.getShowWireframe(), true);
     this._ctrlMatcap.setValue(mesh.getMatcap(), true);
-    this._ctrlTransparency.setValue(100 - 100 * mesh.getOpacity(), true);
-    this._ctrlCurvature.setValue(20 * mesh.getCurvature(), true);
+    this._ctrlTransparency.setValue(100 - 100*mesh.getOpacity(), true);
+    this._ctrlCurvature.setValue(20*mesh.getCurvature(), true);
     this.updateVisibility();
   }
 
   updateVisibility() {
-    var mesh = this._main.getMesh();
+    let mesh = this._main.getMesh();
     if (!mesh) return;
-    var val = mesh.getShaderType();
+    let val = mesh.getShaderType();
     this._ctrlMatcapTitle.setVisibility(val === Enums.Shader.MATCAP);
     this._ctrlMatcap.setVisibility(val === Enums.Shader.MATCAP);
     this._ctrlImportMatcap.setVisibility(val === Enums.Shader.MATCAP);
@@ -235,12 +237,12 @@ class GuiRendering {
     if (event.target.files.length === 0)
       return;
 
-    var file = event.target.files[0];
+    let file = event.target.files[0];
     if (!file.type.match('image.*'))
       return;
 
-    var reader = new FileReader();
-    var main = this._main;
+    let reader = new FileReader();
+    let main = this._main;
     reader.onload = function (evt) {
       // urk...
       ShaderUV.texture0 = undefined;
@@ -256,27 +258,27 @@ class GuiRendering {
     if (event.target.files.length === 0)
       return;
 
-    var file = event.target.files[0];
+    let file = event.target.files[0];
     if (!file.type.match('image.*'))
       return;
 
-    var reader = new FileReader();
-    var main = this._main;
-    var ctrl = this._ctrlMatcap;
+    let reader = new FileReader();
+    let main = this._main;
+    let ctrl = this._ctrlMatcap;
 
     reader.onload = function (evt) {
-      var img = new Image();
+      let img = new Image();
       img.src = evt.target.result;
 
       img.onload = function () {
-        var idMatcap = ShaderMatcap.matcaps.length;
+        let idMatcap = ShaderMatcap.matcaps.length;
         ShaderMatcap.matcaps.push({
           name: file.name
         });
 
         ShaderMatcap.createTexture(main._gl, img, idMatcap);
 
-        var entry = {};
+        let entry = {};
         entry[idMatcap] = file.name;
         ctrl.addOptions(entry);
         ctrl.setValue(idMatcap);

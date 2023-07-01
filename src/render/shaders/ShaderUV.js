@@ -1,7 +1,7 @@
-import ShaderBase from 'render/shaders/ShaderBase';
-import Attribute from 'render/Attribute';
+import ShaderBase from '../shaders/ShaderBase.js';
+import Attribute from '../Attribute.js';
 
-var ShaderUV = ShaderBase.getCopy();
+let ShaderUV = ShaderBase.getCopy();
 ShaderUV.vertexName = ShaderUV.fragmentName = 'ShowUV';
 
 ShaderUV.texPath = 'resources/uv.png';

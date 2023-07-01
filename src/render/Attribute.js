@@ -1,5 +1,4 @@
 class Attribute {
-
   constructor(gl, program, name, size, type) {
     this._gl = gl; // webgl context
     this._location = gl.getAttribLocation(program, name); // the location

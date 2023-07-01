@@ -1,25 +1,26 @@
-import { vec3 } from 'gl-matrix';
-import getOptionsURL from 'misc/getOptionsURL';
-import Utils from 'misc/Utils';
-import Attribute from 'render/Attribute';
-import colorSpaceGLSL from 'render/shaders/glsl/colorSpace.glsl';
-import curvatureGLSL from 'render/shaders/glsl/curvature.glsl';
+import {vec3} from '../../lib/gl-matrix.js';
+import getOptionsURL from '../../misc/getOptionsURL.js';
+import Utils from '../../misc/Utils.js';
+import Attribute from '../Attribute.js';
+import colorSpaceGLSL from './glsl/colorSpace.js';
+import curvatureGLSL from './glsl/curvature.js';
 
 var ShaderBase = {};
 ShaderBase.vertexName = 'VertexName';
 ShaderBase.fragmentName = 'FragmentName';
 
 ShaderBase.activeAttributes = {
-  vertex: true,
-  normal: true,
+  vertex  : true,
+  normal  : true,
   material: true,
-  color: true
+  color   : true
 };
 
 ShaderBase.showSymmetryLine = getOptionsURL().mirrorline;
 ShaderBase.darkenUnselected = getOptionsURL().darkenunselected;
 ShaderBase.uniformNames = {};
-ShaderBase.uniformNames.commonUniforms = ['uMV', 'uMVP', 'uN', 'uEM', 'uEN', 'uFlat', 'uPlaneO', 'uPlaneN', 'uSym', 'uCurvature', 'uAlpha', 'uFov', 'uDarken'];
+ShaderBase.uniformNames.commonUniforms = ['uMV', 'uMVP', 'uN', 'uEM', 'uEN', 'uFlat', 'uPlaneO', 'uPlaneN', 'uSym',
+                                          'uCurvature', 'uAlpha', 'uFov', 'uDarken'];
 
 ShaderBase.strings = {};
 ShaderBase.strings.colorSpaceGLSL = colorSpaceGLSL;
@@ -169,7 +170,7 @@ ShaderBase.updateUniforms = (function () {
 
     gl.uniform1f(uniforms.uCurvature, mesh.getCurvature());
     var cam = main.getCamera();
-    gl.uniform1f(uniforms.uFov, cam.isOrthographic() ? -Math.abs(cam._trans[2]) * 25.0 : cam.getFov());
+    gl.uniform1f(uniforms.uFov, cam.isOrthographic() ? -Math.abs(cam._trans[2])*25.0 : cam.getFov());
   };
 })();
 
@@ -269,8 +270,9 @@ ShaderBase.unbindAttributes = function () {
 ShaderBase.getCopy = function () {
   var keys = Object.keys(ShaderBase);
   var obj = {};
-  for (var i = 0, nb = keys.length; i < nb; ++i)
+  for (var i = 0, nb = keys.length; i < nb; ++i) {
     obj[keys[i]] = this[keys[i]];
+  }
   obj.program = null;
   return obj;
 };

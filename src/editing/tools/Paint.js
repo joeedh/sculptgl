@@ -1,9 +1,8 @@
-import { vec3 } from 'gl-matrix';
-import Tablet from 'misc/Tablet';
-import SculptBase from 'editing/tools/SculptBase';
+import {vec3} from '../../lib/gl-matrix.js';
+import Tablet from '../../misc/Tablet.js';
+import SculptBase from './SculptBase.js';
 
 class Paint extends SculptBase {
-
   constructor(main) {
     super(main);
 
@@ -83,7 +82,7 @@ class Paint extends SculptBase {
 
   stroke(picking) {
     var iVertsInRadius = picking.getPickedVertices();
-    var intensity = this._intensity * Tablet.getPressureIntensity();
+    var intensity = this._intensity*Tablet.getPressureIntensity();
 
     // undo-redo
     this._main.getStateManager().pushVertices(iVertsInRadius);
@@ -117,34 +116,34 @@ class Paint extends SculptBase {
     var cx = center[0];
     var cy = center[1];
     var cz = center[2];
-    var softness = 2 * (1 - hardness);
+    var softness = 2*(1 - hardness);
     for (var i = 0, l = iVerts.length; i < l; ++i) {
-      var ind = iVerts[i] * 3;
+      var ind = iVerts[i]*3;
       var vx = vAr[ind];
       var vy = vAr[ind + 1];
       var vz = vAr[ind + 2];
       var dx = vx - cx;
       var dy = vy - cy;
       var dz = vz - cz;
-      var dist = Math.sqrt(dx * dx + dy * dy + dz * dz) / radius;
+      var dist = Math.sqrt(dx*dx + dy*dy + dz*dz)/radius;
       if (dist > 1) dist = 1.0;
 
       var fallOff = Math.pow(1 - dist, softness);
-      fallOff *= intensity * mAr[ind + 2] * picking.getAlpha(vx, vy, vz);
+      fallOff *= intensity*mAr[ind + 2]*picking.getAlpha(vx, vy, vz);
       var fallOffCompl = 1.0 - fallOff;
 
       if (this._writeAlbedo) {
-        cAr[ind] = cAr[ind] * fallOffCompl + cr * fallOff;
-        cAr[ind + 1] = cAr[ind + 1] * fallOffCompl + cg * fallOff;
-        cAr[ind + 2] = cAr[ind + 2] * fallOffCompl + cb * fallOff;
+        cAr[ind] = cAr[ind]*fallOffCompl + cr*fallOff;
+        cAr[ind + 1] = cAr[ind + 1]*fallOffCompl + cg*fallOff;
+        cAr[ind + 2] = cAr[ind + 2]*fallOffCompl + cb*fallOff;
       }
 
       if (this._writeRoughness) {
-        mAr[ind] = mAr[ind] * fallOffCompl + roughness * fallOff;
+        mAr[ind] = mAr[ind]*fallOffCompl + roughness*fallOff;
       }
 
       if (this._writeMetalness) {
-        mAr[ind + 1] = mAr[ind + 1] * fallOffCompl + metallic * fallOff;
+        mAr[ind + 1] = mAr[ind + 1]*fallOffCompl + metallic*fallOff;
       }
     }
   }
@@ -167,22 +166,22 @@ class Paint extends SculptBase {
     var cg = color[1];
     var cb = color[2];
     for (var i = 0, nb = iVerts.length; i < nb; ++i) {
-      var ind = iVerts[i] * 3;
+      var ind = iVerts[i]*3;
       var fallOff = mAr[ind + 2];
       var fallOffCompl = 1.0 - fallOff;
 
       if (this._writeAlbedo) {
-        cAr[ind] = cAr[ind] * fallOffCompl + cr * fallOff;
-        cAr[ind + 1] = cAr[ind + 1] * fallOffCompl + cg * fallOff;
-        cAr[ind + 2] = cAr[ind + 2] * fallOffCompl + cb * fallOff;
+        cAr[ind] = cAr[ind]*fallOffCompl + cr*fallOff;
+        cAr[ind + 1] = cAr[ind + 1]*fallOffCompl + cg*fallOff;
+        cAr[ind + 2] = cAr[ind + 2]*fallOffCompl + cb*fallOff;
       }
 
       if (this._writeRoughness) {
-        mAr[ind] = mAr[ind] * fallOffCompl + roughness * fallOff;
+        mAr[ind] = mAr[ind]*fallOffCompl + roughness*fallOff;
       }
 
       if (this._writeMetalness) {
-        mAr[ind + 1] = mAr[ind + 1] * fallOffCompl + metallic * fallOff;
+        mAr[ind + 1] = mAr[ind + 1]*fallOffCompl + metallic*fallOff;
       }
     }
 

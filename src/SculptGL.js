@@ -1,15 +1,15 @@
-import 'misc/Polyfill';
-import { vec3 } from 'gl-matrix';
-import { Manager as HammerManager, Pan, Pinch, Tap } from 'hammerjs';
-import Tablet from 'misc/Tablet';
-import Enums from 'misc/Enums';
-import Utils from 'misc/Utils';
-import Scene from 'Scene';
-import Multimesh from 'mesh/multiresolution/Multimesh';
+import './misc/Polyfill.js';
+import { vec3 } from './lib/gl-matrix.js';
+import { Manager as HammerManager, Pan, Pinch, Tap } from './lib/hammerjs.js';
+import Tablet from './misc/Tablet.js';
+import Enums from './misc/Enums.js';
+import Utils from './misc/Utils.js';
+import Scene from './Scene.js';
+import Multimesh from './mesh/multiresolution/Multimesh.js';
 
-var MOUSE_LEFT = 1;
-var MOUSE_MIDDLE = 2;
-var MOUSE_RIGHT = 3;
+let MOUSE_LEFT = 1;
+let MOUSE_MIDDLE = 2;
+let MOUSE_RIGHT = 3;
 
 // Manage events
 class SculptGL extends Scene {
@@ -43,10 +43,10 @@ class SculptGL extends Scene {
   }
 
   addEvents() {
-    var canvas = this._canvas;
+    let canvas = this._canvas;
 
-    var cbMouseWheel = this.onMouseWheel.bind(this);
-    var cbOnPointer = this.onPointer.bind(this);
+    let cbMouseWheel = this.onMouseWheel.bind(this);
+    let cbOnPointer = this.onPointer.bind(this);
 
     // pointer
     canvas.addEventListener('pointerdown', cbOnPointer, false);
@@ -65,8 +65,8 @@ class SculptGL extends Scene {
     window.addEventListener('keydown', this.onKeyDown.bind(this), false);
     window.addEventListener('keyup', this.onKeyUp.bind(this), false);
 
-    var cbLoadFiles = this.loadFiles.bind(this);
-    var cbStopAndPrevent = this.stopAndPrevent.bind(this);
+    let cbLoadFiles = this.loadFiles.bind(this);
+    let cbStopAndPrevent = this.stopAndPrevent.bind(this);
     // misc
     canvas.addEventListener('webglcontextlost', this.onContextLost.bind(this), false);
     canvas.addEventListener('webglcontextrestored', this.onContextRestored.bind(this), false);
@@ -87,7 +87,7 @@ class SculptGL extends Scene {
   }
 
   _initHammerRecognizers() {
-    var hm = this._hammer;
+    let hm = this._hammer;
     // double tap
     hm.add(new Tap({
       event: 'doubletap',
@@ -127,7 +127,7 @@ class SculptGL extends Scene {
   }
 
   _initHammerEvents() {
-    var hm = this._hammer;
+    let hm = this._hammer;
     hm.on('panstart', this.onPanStart.bind(this));
     hm.on('panmove', this.onPanMove.bind(this));
     hm.on('panend pancancel', this.onPanEnd.bind(this));
@@ -169,7 +169,7 @@ class SculptGL extends Scene {
     if (e.pointerType === 'mouse')
       return;
     this._focusGui = false;
-    var evProxy = this._eventProxy;
+    let evProxy = this._eventProxy;
     evProxy.pageX = e.center.x;
     evProxy.pageY = e.center.y;
     this.onPanUpdateNbPointers(Math.min(3, e.pointers.length));
@@ -178,11 +178,11 @@ class SculptGL extends Scene {
   onPanMove(e) {
     if (e.pointerType === 'mouse')
       return;
-    var evProxy = this._eventProxy;
+    let evProxy = this._eventProxy;
     evProxy.pageX = e.center.x;
     evProxy.pageY = e.center.y;
 
-    var nbPointers = Math.min(3, e.pointers.length);
+    let nbPointers = Math.min(3, e.pointers.length);
     if (nbPointers !== this._lastNbPointers) {
       this.onDeviceUp();
       this.onPanUpdateNbPointers(nbPointers);
@@ -205,7 +205,7 @@ class SculptGL extends Scene {
 
   onPanUpdateNbPointers(nbPointers) {
     // called on panstart or panmove (not consistent)
-    var evProxy = this._eventProxy;
+    let evProxy = this._eventProxy;
     evProxy.which = nbPointers === 1 && this._lastNbPointers >= 1 ? 3 : nbPointers;
     this._lastNbPointers = nbPointers;
     this.onDeviceDown(evProxy);
@@ -226,21 +226,21 @@ class SculptGL extends Scene {
       return;
     }
 
-    var evProxy = this._eventProxy;
+    let evProxy = this._eventProxy;
     evProxy.pageX = e.center.x;
     evProxy.pageY = e.center.y;
     this.setMousePosition(evProxy);
 
-    var picking = this._picking;
-    var res = picking.intersectionMouseMeshes();
-    var cam = this._camera;
-    var pivot = [0.0, 0.0, 0.0];
+    let picking = this._picking;
+    let res = picking.intersectionMouseMeshes();
+    let cam = this._camera;
+    let pivot = [0.0, 0.0, 0.0];
     if (!res) {
       return this.resetCameraMeshes();
     }
 
     vec3.transformMat4(pivot, picking.getIntersectionPoint(), picking.getMesh().getMatrix());
-    var zoom = cam._trans[2];
+    let zoom = cam._trans[2];
     if (!cam.isOrthographic()) {
       zoom = Math.min(zoom, vec3.dist(pivot, cam.computePosition()));
     }
@@ -260,7 +260,7 @@ class SculptGL extends Scene {
   }
 
   onPinchInOut(e) {
-    var dir = (e.scale - this._lastScale) * 25;
+    let dir = (e.scale - this._lastScale) * 25;
     this._lastScale = e.scale;
     this.onDeviceWheel(dir);
   }
@@ -269,9 +269,9 @@ class SculptGL extends Scene {
     if (!meshes) meshes = this._meshes;
 
     if (meshes.length > 0) {
-      var pivot = [0.0, 0.0, 0.0];
-      var box = this.computeBoundingBoxMeshes(meshes);
-      var zoom = 0.8 * this.computeRadiusFromBoundingBox(box);
+      let pivot = [0.0, 0.0, 0.0];
+      let box = this.computeBoundingBoxMeshes(meshes);
+      let zoom = 0.8 * this.computeRadiusFromBoundingBox(box);
       zoom *= this._camera.computeFrustumFit();
       vec3.set(pivot, (box[0] + box[3]) * 0.5, (box[1] + box[4]) * 0.5, (box[2] + box[5]) * 0.5);
       this._camera.setAndFocusOnPivot(pivot, zoom);
@@ -286,7 +286,7 @@ class SculptGL extends Scene {
   // LOAD FILES
   ////////////////
   getFileType(name) {
-    var lower = name.toLowerCase();
+    let lower = name.toLowerCase();
     if (lower.endsWith('.obj')) return 'obj';
     if (lower.endsWith('.sgl')) return 'sgl';
     if (lower.endsWith('.stl')) return 'stl';
@@ -297,21 +297,21 @@ class SculptGL extends Scene {
   loadFiles(event) {
     event.stopPropagation();
     event.preventDefault();
-    var files = event.dataTransfer ? event.dataTransfer.files : event.target.files;
-    for (var i = 0, nb = files.length; i < nb; ++i) {
-      var file = files[i];
-      var fileType = this.getFileType(file.name);
+    let files = event.dataTransfer ? event.dataTransfer.files : event.target.files;
+    for (let i = 0, nb = files.length; i < nb; ++i) {
+      let file = files[i];
+      let fileType = this.getFileType(file.name);
       this.readFile(file, fileType);
     }
   }
 
   readFile(file, ftype) {
-    var fileType = ftype || this.getFileType(file.name);
+    let fileType = ftype || this.getFileType(file.name);
     if (!fileType)
       return;
 
-    var reader = new FileReader();
-    var self = this;
+    let reader = new FileReader();
+    let self = this;
     reader.onload = function (evt) {
       self.loadScene(evt.target.result, fileType);
       document.getElementById('fileopen').value = '';
@@ -365,7 +365,7 @@ class SculptGL extends Scene {
     event.preventDefault();
 
     this._gui.callFunc('onMouseWheel', event);
-    var dir = event.wheelDelta === undefined ? -event.detail : event.wheelDelta;
+    let dir = event.wheelDelta === undefined ? -event.detail : event.wheelDelta;
     this.onDeviceWheel(dir > 0 ? 1 : -1);
   }
 
@@ -422,11 +422,11 @@ class SculptGL extends Scene {
 
     this.setMousePosition(event);
 
-    var mouseX = this._mouseX;
-    var mouseY = this._mouseY;
-    var button = event.which;
+    let mouseX = this._mouseX;
+    let mouseY = this._mouseY;
+    let button = event.which;
 
-    var canEdit = false;
+    let canEdit = false;
     if (button === MOUSE_LEFT)
       canEdit = this._sculptManager.start(event.shiftKey);
 
@@ -464,10 +464,10 @@ class SculptGL extends Scene {
       return;
     this.setMousePosition(event);
 
-    var mouseX = this._mouseX;
-    var mouseY = this._mouseY;
-    var action = this._action;
-    var speedFactor = this.getSpeedFactor();
+    let mouseX = this._mouseX;
+    let mouseY = this._mouseY;
+    let action = this._action;
+    let speedFactor = this.getSpeedFactor();
 
     if (action === Enums.Action.CAMERA_ZOOM || (action === Enums.Action.CAMERA_PAN_ZOOM_ALT && !event.altKey)) {
 

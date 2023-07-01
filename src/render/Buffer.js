@@ -1,5 +1,4 @@
 class Buffer {
-
   constructor(gl, type, hint) {
     this._gl = gl; // webgl context
     this._buffer = gl.createBuffer(); // the buffer

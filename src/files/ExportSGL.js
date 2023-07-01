@@ -1,6 +1,6 @@
-import ShaderBase from 'render/shaders/ShaderBase';
+import ShaderBase from '../render/shaders/ShaderBase.js';
 
-var Export = {};
+let Export = {};
 
 // versions
 // 1 initial
@@ -54,30 +54,30 @@ Export.VERSION = 3;
 /** Export SGL (sculptgl) file */
 
 Export.exportSGL = function (meshes, main) {
-  var nbMeshes = meshes.length;
+  let nbMeshes = meshes.length;
 
-  var bytePerMesh = 3 + 16 + 1 + 6 + 5;
-  var nbBytes = 4 * (1 + 3 + 4 + 1 + nbMeshes * bytePerMesh);
-  var i = 0;
-  var mesh;
+  let bytePerMesh = 3 + 16 + 1 + 6 + 5;
+  let nbBytes = 4*(1 + 3 + 4 + 1 + nbMeshes*bytePerMesh);
+  let i = 0;
+  let mesh;
   for (i = 0; i < nbMeshes; ++i) {
     mesh = meshes[i];
-    nbBytes += mesh.getNbVertices() * 4 * 3;
+    nbBytes += mesh.getNbVertices()*4*3;
     if (mesh.getColors())
-      nbBytes += mesh.getNbVertices() * 4 * 3;
+      nbBytes += mesh.getNbVertices()*4*3;
     if (mesh.getMaterials())
-      nbBytes += mesh.getNbVertices() * 4 * 3;
-    nbBytes += mesh.getNbFaces() * 4 * 4;
+      nbBytes += mesh.getNbVertices()*4*3;
+    nbBytes += mesh.getNbFaces()*4*4;
     if (mesh.hasUV()) {
-      nbBytes += mesh.getNbTexCoords() * 4 * 2;
-      nbBytes += mesh.getNbFaces() * 4 * 4;
+      nbBytes += mesh.getNbTexCoords()*4*2;
+      nbBytes += mesh.getNbFaces()*4*4;
     }
   }
 
-  var buffer = new ArrayBuffer(nbBytes);
-  var f32a = new Float32Array(buffer);
-  var u32a = new Uint32Array(buffer);
-  var off = 0;
+  let buffer = new ArrayBuffer(nbBytes);
+  let f32a = new Float32Array(buffer);
+  let u32a = new Uint32Array(buffer);
+  let off = 0;
   u32a[off++] = Export.VERSION;
 
   // misc stuffs
@@ -86,7 +86,7 @@ Export.exportSGL = function (meshes, main) {
   u32a[off++] = main._showContour;
 
   // camera stuffs
-  var cam = main.getCamera();
+  let cam = main.getCamera();
   u32a[off++] = cam.getProjectionType();
   u32a[off++] = cam.getMode();
   f32a[off++] = cam.getFov();
@@ -112,49 +112,49 @@ Export.exportSGL = function (meshes, main) {
     f32a[off++] = mesh.getScale();
 
     // vertices
-    var nbVertices = mesh.getNbVertices();
+    let nbVertices = mesh.getNbVertices();
     u32a[off++] = nbVertices;
-    f32a.set(mesh.getVertices().subarray(0, nbVertices * 3), off);
-    off += nbVertices * 3;
+    f32a.set(mesh.getVertices().subarray(0, nbVertices*3), off);
+    off += nbVertices*3;
 
     // colors
-    var nbColors = mesh.getColors() ? nbVertices : 0;
+    let nbColors = mesh.getColors() ? nbVertices : 0;
     u32a[off++] = nbColors;
     if (nbColors > 0)
-      f32a.set(mesh.getColors().subarray(0, nbVertices * 3), off);
-    off += nbColors * 3;
+      f32a.set(mesh.getColors().subarray(0, nbVertices*3), off);
+    off += nbColors*3;
 
     // materials
-    var nbMaterials = mesh.getMaterials() ? nbVertices : 0;
+    let nbMaterials = mesh.getMaterials() ? nbVertices : 0;
     u32a[off++] = nbMaterials;
     if (nbMaterials > 0)
-      f32a.set(mesh.getMaterials().subarray(0, nbVertices * 3), off);
-    off += nbMaterials * 3;
+      f32a.set(mesh.getMaterials().subarray(0, nbVertices*3), off);
+    off += nbMaterials*3;
 
     // faces
-    var nbFaces = mesh.getNbFaces();
+    let nbFaces = mesh.getNbFaces();
     u32a[off++] = nbFaces;
-    u32a.set(mesh.getFaces().subarray(0, nbFaces * 4), off);
-    off += nbFaces * 4;
+    u32a.set(mesh.getFaces().subarray(0, nbFaces*4), off);
+    off += nbFaces*4;
 
-    var hasUV = mesh.hasUV();
+    let hasUV = mesh.hasUV();
     // uvs
-    var nbTexCoords = mesh.getNbTexCoords();
+    let nbTexCoords = mesh.getNbTexCoords();
     u32a[off++] = hasUV ? nbTexCoords : 0;
     if (hasUV) {
-      f32a.set(mesh.getTexCoords().subarray(0, nbTexCoords * 2), off);
-      off += nbTexCoords * 2;
+      f32a.set(mesh.getTexCoords().subarray(0, nbTexCoords*2), off);
+      off += nbTexCoords*2;
     }
 
     // face uvs
     u32a[off++] = hasUV ? nbFaces : 0;
     if (hasUV) {
-      u32a.set(mesh.getFacesTexCoord().subarray(0, nbFaces * 4), off);
-      off += nbFaces * 4;
+      u32a.set(mesh.getFacesTexCoord().subarray(0, nbFaces*4), off);
+      off += nbFaces*4;
     }
   }
 
-  var data = new DataView(buffer, 0, off * 4);
+  let data = new DataView(buffer, 0, off*4);
   return new Blob([data]);
 };
 

@@ -1,23 +1,23 @@
-import { vec3, mat4 } from 'gl-matrix';
-import Geometry from 'math3d/Geometry';
-import Tablet from 'misc/Tablet';
-import Utils from 'misc/Utils';
-import TR from 'gui/GuiTR';
+import { vec3, mat4 } from '../lib/gl-matrix.js';
+import Geometry from './Geometry.js';
+import Tablet from '../misc/Tablet.js';
+import Utils from '../misc/Utils.js';
+import TR from '../gui/GuiTR.js';
 
-var _TMP_NEAR = [0.0, 0.0, 0.0];
-var _TMP_NEAR_1 = [0.0, 0.0, 0.0];
-var _TMP_FAR = [0.0, 0.0, 0.0];
-var _TMP_INV = mat4.create();
-var _TMP_INTER = [0.0, 0.0, 0.0];
-var _TMP_INTER_1 = [0.0, 0.0, 0.0];
-var _TMP_V1 = [0.0, 0.0, 0.0];
-var _TMP_V2 = [0.0, 0.0, 0.0];
-var _TMP_V3 = [0.0, 0.0, 0.0];
+let _TMP_NEAR = [0.0, 0.0, 0.0];
+let _TMP_NEAR_1 = [0.0, 0.0, 0.0];
+let _TMP_FAR = [0.0, 0.0, 0.0];
+let _TMP_INV = mat4.create();
+let _TMP_INTER = [0.0, 0.0, 0.0];
+let _TMP_INTER_1 = [0.0, 0.0, 0.0];
+let _TMP_V1 = [0.0, 0.0, 0.0];
+let _TMP_V2 = [0.0, 0.0, 0.0];
+let _TMP_V3 = [0.0, 0.0, 0.0];
 
 class Picking {
 
   static addAlpha(u8, width, height, name) {
-    var newAlpha = {};
+    let newAlpha = {};
     newAlpha._name = name;
     newAlpha._texture = u8;
     newAlpha._ratioX = Math.max(1.0, width / height);
@@ -25,7 +25,7 @@ class Picking {
     newAlpha._ratioMax = Math.max(newAlpha._ratioX, newAlpha._ratioY);
     newAlpha._width = width;
     newAlpha._height = height;
-    var i = 1;
+    let i = 1;
     while (Picking.ALPHAS[newAlpha._name])
       newAlpha._name = name + (i++);
     Picking.ALPHAS[newAlpha._name] = newAlpha;
@@ -58,36 +58,36 @@ class Picking {
   }
 
   getAlpha(x, y, z) {
-    var alpha = this._alpha;
+    let alpha = this._alpha;
     if (!alpha || !alpha._texture) return 1.0;
 
-    var m = this._alphaLookAt;
-    var rs = this._alphaSide;
+    let m = this._alphaLookAt;
+    let rs = this._alphaSide;
 
-    var xn = alpha._ratioY * (m[0] * x + m[4] * y + m[8] * z + m[12]) / (this._xSym ? -rs : rs);
+    let xn = alpha._ratioY * (m[0] * x + m[4] * y + m[8] * z + m[12]) / (this._xSym ? -rs : rs);
     if (Math.abs(xn) > 1.0) return 0.0;
 
-    var yn = alpha._ratioX * (m[1] * x + m[5] * y + m[9] * z + m[13]) / rs;
+    let yn = alpha._ratioX * (m[1] * x + m[5] * y + m[9] * z + m[13]) / rs;
     if (Math.abs(yn) > 1.0) return 0.0;
 
-    var aw = alpha._width;
+    let aw = alpha._width;
     xn = (0.5 - xn * 0.5) * aw;
     yn = (0.5 - yn * 0.5) * alpha._height;
     return alpha._texture[(xn | 0) + aw * (yn | 0)] / 255.0;
   }
 
   updateAlpha(keepOrigin) {
-    var dir = _TMP_V1;
-    var nor = _TMP_V2;
+    let dir = _TMP_V1;
+    let nor = _TMP_V2;
 
-    var radius = Math.sqrt(this._rLocal2);
+    let radius = Math.sqrt(this._rLocal2);
     this._alphaSide = radius * Math.SQRT1_2;
 
     vec3.sub(dir, this._interPoint, this._alphaOrigin);
     if (vec3.len(dir) === 0) return;
     vec3.normalize(dir, dir);
 
-    var normal = this._pickedNormal;
+    let normal = this._pickedNormal;
     vec3.scaleAndAdd(dir, dir, normal, -vec3.dot(dir, normal));
     vec3.normalize(dir, dir);
 
@@ -154,14 +154,14 @@ class Picking {
   /** Intersection between a ray the mouse position for every meshes */
   intersectionMouseMeshes(meshes = this._main.getMeshes(), mouseX = this._main._mouseX, mouseY = this._main._mouseY) {
 
-    var vNear = this.unproject(mouseX, mouseY, 0.0);
-    var vFar = this.unproject(mouseX, mouseY, 0.1);
-    var nearDistance = Infinity;
-    var nearMesh = null;
-    var nearFace = -1;
+    let vNear = this.unproject(mouseX, mouseY, 0.0);
+    let vFar = this.unproject(mouseX, mouseY, 0.1);
+    let nearDistance = Infinity;
+    let nearMesh = null;
+    let nearFace = -1;
 
-    for (var i = 0, nbMeshes = meshes.length; i < nbMeshes; ++i) {
-      var mesh = meshes[i];
+    for (let i = 0, nbMeshes = meshes.length; i < nbMeshes; ++i) {
+      let mesh = meshes[i];
       if (!mesh.isVisible())
         continue;
 
@@ -171,8 +171,8 @@ class Picking {
       if (!this.intersectionRayMesh(mesh, _TMP_NEAR_1, _TMP_FAR))
         continue;
 
-      var interTest = this.getIntersectionPoint();
-      var testDistance = vec3.dist(_TMP_NEAR_1, interTest) * mesh.getScale();
+      let interTest = this.getIntersectionPoint();
+      let testDistance = vec3.dist(_TMP_NEAR_1, interTest) * mesh.getScale();
       if (testDistance < nearDistance) {
         nearDistance = testDistance;
         nearMesh = mesh;
@@ -191,9 +191,9 @@ class Picking {
 
   /** Intersection between a ray the mouse position */
   intersectionMouseMesh(mesh = this._main.getMesh(), mouseX = this._main._mouseX, mouseY = this._main._mouseY) {
-    var vNear = this.unproject(mouseX, mouseY, 0.0);
-    var vFar = this.unproject(mouseX, mouseY, 0.1);
-    var matInverse = mat4.create();
+    let vNear = this.unproject(mouseX, mouseY, 0.0);
+    let vFar = this.unproject(mouseX, mouseY, 0.1);
+    let matInverse = mat4.create();
     mat4.invert(matInverse, mesh.getMatrix());
     vec3.transformMat4(vNear, vNear, matInverse);
     vec3.transformMat4(vFar, vFar, matInverse);
@@ -210,25 +210,25 @@ class Picking {
     vec3.copy(_TMP_FAR, vFarOrig);
     // apply symmetry
     if (this._xSym) {
-      var ptPlane = mesh.getSymmetryOrigin();
-      var nPlane = mesh.getSymmetryNormal();
+      let ptPlane = mesh.getSymmetryOrigin();
+      let nPlane = mesh.getSymmetryNormal();
       Geometry.mirrorPoint(_TMP_NEAR, ptPlane, nPlane);
       Geometry.mirrorPoint(_TMP_FAR, ptPlane, nPlane);
     }
-    var vAr = mesh.getVertices();
-    var fAr = mesh.getFaces();
+    let vAr = mesh.getVertices();
+    let fAr = mesh.getFaces();
     // compute eye direction
-    var eyeDir = this.getEyeDirection();
+    let eyeDir = this.getEyeDirection();
     vec3.sub(eyeDir, _TMP_FAR, _TMP_NEAR);
     vec3.normalize(eyeDir, eyeDir);
-    var iFacesCandidates = mesh.intersectRay(_TMP_NEAR, eyeDir);
-    var distance = Infinity;
-    var nbFacesCandidates = iFacesCandidates.length;
-    for (var i = 0; i < nbFacesCandidates; ++i) {
-      var indFace = iFacesCandidates[i] * 4;
-      var ind1 = fAr[indFace] * 3;
-      var ind2 = fAr[indFace + 1] * 3;
-      var ind3 = fAr[indFace + 2] * 3;
+    let iFacesCandidates = mesh.intersectRay(_TMP_NEAR, eyeDir);
+    let distance = Infinity;
+    let nbFacesCandidates = iFacesCandidates.length;
+    for (let i = 0; i < nbFacesCandidates; ++i) {
+      let indFace = iFacesCandidates[i] * 4;
+      let ind1 = fAr[indFace] * 3;
+      let ind2 = fAr[indFace + 1] * 3;
+      let ind3 = fAr[indFace + 2] * 3;
       _TMP_V1[0] = vAr[ind1];
       _TMP_V1[1] = vAr[ind1 + 1];
       _TMP_V1[2] = vAr[ind1 + 2];
@@ -238,7 +238,7 @@ class Picking {
       _TMP_V3[0] = vAr[ind3];
       _TMP_V3[1] = vAr[ind3 + 1];
       _TMP_V3[2] = vAr[ind3 + 2];
-      var hitDist = Geometry.intersectionRayTriangle(_TMP_NEAR, eyeDir, _TMP_V1, _TMP_V2, _TMP_V3, _TMP_INTER);
+      let hitDist = Geometry.intersectionRayTriangle(_TMP_NEAR, eyeDir, _TMP_V1, _TMP_V2, _TMP_V3, _TMP_INTER);
       if (hitDist < 0.0) {
         ind2 = fAr[indFace + 3];
         if (ind2 !== Utils.TRI_INDEX) {
@@ -266,28 +266,28 @@ class Picking {
 
   /** Find all the vertices inside the sphere */
   pickVerticesInSphere(rLocal2) {
-    var mesh = this._mesh;
-    var vAr = mesh.getVertices();
-    var vertSculptFlags = mesh.getVerticesSculptFlags();
-    var inter = this.getIntersectionPoint();
+    let mesh = this._mesh;
+    let vAr = mesh.getVertices();
+    let vertSculptFlags = mesh.getVerticesSculptFlags();
+    let inter = this.getIntersectionPoint();
 
-    var iFacesInCells = mesh.intersectSphere(inter, rLocal2, true);
-    var iVerts = mesh.getVerticesFromFaces(iFacesInCells);
-    var nbVerts = iVerts.length;
+    let iFacesInCells = mesh.intersectSphere(inter, rLocal2, true);
+    let iVerts = mesh.getVerticesFromFaces(iFacesInCells);
+    let nbVerts = iVerts.length;
 
-    var sculptFlag = ++Utils.SCULPT_FLAG;
-    var pickedVertices = new Uint32Array(Utils.getMemory(4 * nbVerts), 0, nbVerts);
-    var acc = 0;
-    var itx = inter[0];
-    var ity = inter[1];
-    var itz = inter[2];
+    let sculptFlag = ++Utils.SCULPT_FLAG;
+    let pickedVertices = new Uint32Array(Utils.getMemory(4 * nbVerts), 0, nbVerts);
+    let acc = 0;
+    let itx = inter[0];
+    let ity = inter[1];
+    let itz = inter[2];
 
-    for (var i = 0; i < nbVerts; ++i) {
-      var ind = iVerts[i];
-      var j = ind * 3;
-      var dx = itx - vAr[j];
-      var dy = ity - vAr[j + 1];
-      var dz = itz - vAr[j + 2];
+    for (let i = 0; i < nbVerts; ++i) {
+      let ind = iVerts[i];
+      let j = ind * 3;
+      let dx = itx - vAr[j];
+      let dy = ity - vAr[j + 1];
+      let dz = itz - vAr[j + 2];
       if ((dx * dx + dy * dy + dz * dz) < rLocal2) {
         vertSculptFlags[ind] = sculptFlag;
         pickedVertices[acc++] = ind;
@@ -300,35 +300,35 @@ class Picking {
 
   _isInsideSphere(id, inter, rLocal2) {
     if (id === Utils.TRI_INDEX) return false;
-    var iv = id * 3;
+    let iv = id * 3;
     return vec3.sqrDist(inter, this._mesh.getVertices().subarray(iv, iv + 3)) <= rLocal2;
   }
 
   /** Find all the vertices inside the sphere (with topological check) */
   pickVerticesInSphereTopological(rLocal2) {
-    var mesh = this._mesh;
-    var nbVertices = mesh.getNbVertices();
-    var vAr = mesh.getVertices();
-    var fAr = mesh.getFaces();
+    let mesh = this._mesh;
+    let nbVertices = mesh.getNbVertices();
+    let vAr = mesh.getVertices();
+    let fAr = mesh.getFaces();
 
-    var vrvStartCount = mesh.getVerticesRingVertStartCount();
-    var vertRingVert = mesh.getVerticesRingVert();
-    var ringVerts = vertRingVert instanceof Array ? vertRingVert : null;
+    let vrvStartCount = mesh.getVerticesRingVertStartCount();
+    let vertRingVert = mesh.getVerticesRingVert();
+    let ringVerts = vertRingVert instanceof Array ? vertRingVert : null;
 
-    var vertSculptFlags = mesh.getVerticesSculptFlags();
-    var vertTagFlags = mesh.getVerticesTagFlags();
+    let vertSculptFlags = mesh.getVerticesSculptFlags();
+    let vertTagFlags = mesh.getVerticesTagFlags();
 
-    var sculptFlag = ++Utils.SCULPT_FLAG;
-    var tagFlag = ++Utils.TAG_FLAG;
+    let sculptFlag = ++Utils.SCULPT_FLAG;
+    let tagFlag = ++Utils.TAG_FLAG;
 
-    var inter = this.getIntersectionPoint();
-    var itx = inter[0];
-    var ity = inter[1];
-    var itz = inter[2];
+    let inter = this.getIntersectionPoint();
+    let itx = inter[0];
+    let ity = inter[1];
+    let itz = inter[2];
 
-    var pickedVertices = new Uint32Array(Utils.getMemory(4 * nbVertices), 0, nbVertices);
-    var idf = this.getPickedFace() * 4;
-    var acc = 1;
+    let pickedVertices = new Uint32Array(Utils.getMemory(4 * nbVertices), 0, nbVertices);
+    let idf = this.getPickedFace() * 4;
+    let acc = 1;
 
     if (this._isInsideSphere(fAr[idf], inter, rLocal2)) pickedVertices[0] = fAr[idf];
     else if (this._isInsideSphere(fAr[idf + 1], inter, rLocal2)) pickedVertices[0] = fAr[idf + 1];
@@ -341,9 +341,9 @@ class Picking {
       vertTagFlags[pickedVertices[0]] = tagFlag;
     }
 
-    for (var i = 0; i < acc; ++i) {
-      var id = pickedVertices[i];
-      var start, end;
+    for (let i = 0; i < acc; ++i) {
+      let id = pickedVertices[i];
+      let start, end;
       if (ringVerts) {
         vertRingVert = ringVerts[id];
         start = 0;
@@ -353,16 +353,16 @@ class Picking {
         end = start + vrvStartCount[id * 2 + 1];
       }
 
-      for (var j = start; j < end; ++j) {
-        var idv = vertRingVert[j];
+      for (let j = start; j < end; ++j) {
+        let idv = vertRingVert[j];
         if (vertTagFlags[idv] === tagFlag)
           continue;
         vertTagFlags[idv] = tagFlag;
 
-        var id3 = idv * 3;
-        var dx = itx - vAr[id3];
-        var dy = ity - vAr[id3 + 1];
-        var dz = itz - vAr[id3 + 2];
+        let id3 = idv * 3;
+        let dx = itx - vAr[id3];
+        let dy = ity - vAr[id3 + 1];
+        let dz = itz - vAr[id3 + 2];
         if ((dx * dx + dy * dy + dz * dz) > rLocal2)
           continue;
 
@@ -379,10 +379,10 @@ class Picking {
 
     vec3.transformMat4(_TMP_INTER, this.getIntersectionPoint(), this._mesh.getMatrix());
 
-    var offsetX = this._main.getSculptManager().getCurrentTool().getScreenRadius();
+    let offsetX = this._main.getSculptManager().getCurrentTool().getScreenRadius();
     if (!ignorePressure) offsetX *= Tablet.getPressureRadius();
 
-    var screenInter = this.project(_TMP_INTER);
+    let screenInter = this.project(_TMP_INTER);
     return vec3.sqrDist(_TMP_INTER, this.unproject(screenInter[0] + offsetX, screenInter[1], screenInter[2]));
   }
 
@@ -407,23 +407,23 @@ class Picking {
   }
 
   polyLerp(vField, out) {
-    var vAr = this._mesh.getVertices();
-    var fAr = this._mesh.getFaces();
-    var id = this._pickedFace * 4;
-    var iv1 = fAr[id] * 3;
-    var iv2 = fAr[id + 1] * 3;
-    var iv3 = fAr[id + 2] * 3;
+    let vAr = this._mesh.getVertices();
+    let fAr = this._mesh.getFaces();
+    let id = this._pickedFace * 4;
+    let iv1 = fAr[id] * 3;
+    let iv2 = fAr[id + 1] * 3;
+    let iv3 = fAr[id + 2] * 3;
 
-    var iv4 = fAr[id + 3];
-    var isQuad = iv4 !== Utils.TRI_INDEX;
+    let iv4 = fAr[id + 3];
+    let isQuad = iv4 !== Utils.TRI_INDEX;
     if (isQuad) iv4 *= 3;
 
-    var len1 = 1.0 / vec3.dist(this._interPoint, vAr.subarray(iv1, iv1 + 3));
-    var len2 = 1.0 / vec3.dist(this._interPoint, vAr.subarray(iv2, iv2 + 3));
-    var len3 = 1.0 / vec3.dist(this._interPoint, vAr.subarray(iv3, iv3 + 3));
-    var len4 = isQuad ? 1.0 / vec3.dist(this._interPoint, vAr.subarray(iv4, iv4 + 3)) : 0.0;
+    let len1 = 1.0 / vec3.dist(this._interPoint, vAr.subarray(iv1, iv1 + 3));
+    let len2 = 1.0 / vec3.dist(this._interPoint, vAr.subarray(iv2, iv2 + 3));
+    let len3 = 1.0 / vec3.dist(this._interPoint, vAr.subarray(iv3, iv3 + 3));
+    let len4 = isQuad ? 1.0 / vec3.dist(this._interPoint, vAr.subarray(iv4, iv4 + 3)) : 0.0;
 
-    var invSum = 1.0 / (len1 + len2 + len3 + len4);
+    let invSum = 1.0 / (len1 + len2 + len3 + len4);
     vec3.set(out, 0.0, 0.0, 0.0);
     vec3.scaleAndAdd(out, out, vField.subarray(iv1, iv1 + 3), len1 * invSum);
     vec3.scaleAndAdd(out, out, vField.subarray(iv2, iv2 + 3), len2 * invSum);
@@ -437,17 +437,17 @@ class Picking {
 Picking.INIT_ALPHAS_NAMES = [TR('alphaSquare'), TR('alphaSkin')];
 Picking.INIT_ALPHAS_PATHS = ['square.jpg', 'skin.jpg'];
 
-var readAlphas = function () {
+let readAlphas = function () {
   // check nodejs
   if (!window.module || !window.module.exports) return;
-  var fs = eval('require')('fs');
-  var path = eval('require')('path');
+  let fs = eval('require')('fs');
+  let path = eval('require')('path');
 
-  var directoryPath = path.join(window.__filename, '../resources/alpha');
+  let directoryPath = path.join(window.__filename, '../resources/alpha');
   fs.readdir(directoryPath, function (err, files) {
     if (err) return;
-    for (var i = 0; i < files.length; ++i) {
-      var fname = files[i];
+    for (let i = 0; i < files.length; ++i) {
+      let fname = files[i];
       if (fname == 'square.jpg' || fname == 'skin.jpg') continue;
       Picking.INIT_ALPHAS_NAMES.push(fname);
       Picking.INIT_ALPHAS_PATHS.push(fname);
@@ -457,7 +457,7 @@ var readAlphas = function () {
 
 readAlphas();
 
-var none = TR('alphaNone');
+let none = TR('alphaNone');
 Picking.ALPHAS_NAMES = {};
 Picking.ALPHAS_NAMES[none] = none;
 

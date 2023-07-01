@@ -1,6 +1,6 @@
-import TR from 'gui/GuiTR';
-import Remesh from 'editing/Remesh';
-import ShaderBase from 'render/shaders/ShaderBase';
+import TR from './GuiTR.js';
+import Remesh from '../editing/Remesh.js';
+import ShaderBase from '../render/shaders/ShaderBase.js';
 
 class GuiScene {
 
@@ -11,10 +11,10 @@ class GuiScene {
   }
 
   init(guiParent) {
-    var menu = this._menu = guiParent.addMenu(TR('sceneTitle'));
+    let menu = this._menu = guiParent.addMenu(TR('sceneTitle'));
 
     // scene
-    menu.addButton(TR('sceneReset'), this, 'clearScene' /*, 'CTRL+ALT+N'*/ );
+    menu.addButton(TR('sceneReset'), this, 'clearScene' /*, 'CTRL+ALT+N'*/);
     menu.addButton(TR('sceneAddSphere'), this._main, 'addSphere');
     menu.addButton(TR('sceneAddCube'), this._main, 'addCube');
     menu.addButton(TR('sceneAddCylinder'), this._main, 'addCylinder');
@@ -58,7 +58,7 @@ class GuiScene {
   }
 
   onOffsetSymmetry(val) {
-    var mesh = this._main.getMesh();
+    let mesh = this._main.getMesh();
     if (mesh) {
       mesh.setSymmetryOffset(val);
       this._main.render();
@@ -134,29 +134,29 @@ class GuiScene {
   }
 
   hasHiddenMeshes() {
-    var meshes = this._main.getMeshes();
-    for (var i = 0; i < meshes.length; ++i) {
+    let meshes = this._main.getMeshes();
+    for (let i = 0; i < meshes.length; ++i) {
       if (!meshes[i].isVisible()) return true;
     }
     return false;
   }
 
   updateMesh() {
-    var nbMeshes = this._main.getMeshes().length;
-    var nbSelected = this._main.getSelectedMeshes().length;
+    let nbMeshes = this._main.getMeshes().length;
+    let nbSelected = this._main.getSelectedMeshes().length;
     this._ctrlIsolate.setVisibility(this.hasHiddenMeshes() || (nbMeshes !== nbSelected && nbSelected >= 1));
     this._ctrlMerge.setVisibility(nbSelected > 1);
 
-    var mesh = this._main.getMesh();
+    let mesh = this._main.getMesh();
     this._ctrlOffSym.setValue(mesh ? mesh.getSymmetryOffset() : 0);
   }
 
   merge() {
-    var main = this._main;
-    var selMeshes = main.getSelectedMeshes();
+    let main = this._main;
+    let selMeshes = main.getSelectedMeshes();
     if (selMeshes.length < 2) return;
 
-    var newMesh = Remesh.mergeMeshes(selMeshes, main.getMesh() || selMeshes[0]);
+    let newMesh = Remesh.mergeMeshes(selMeshes, main.getMesh() || selMeshes[0]);
     main.removeMeshes(selMeshes);
     main.getStateManager().pushStateAddRemove(newMesh, selMeshes.slice());
     main.getMeshes().push(newMesh);
@@ -174,7 +174,7 @@ class GuiScene {
   }
 
   setMeshesVisible(meshes, bool) {
-    for (var i = 0; i < meshes.length; ++i) {
+    for (let i = 0; i < meshes.length; ++i) {
       meshes[i].setVisible(bool);
     }
     this._ctrlIsolate.setValue(!bool, true);
@@ -182,23 +182,23 @@ class GuiScene {
 
   pushSetMeshesVisible(hideMeshes, bool) {
     this.setMeshesVisible(hideMeshes, bool);
-    var cbUndo = this.setMeshesVisible.bind(this, hideMeshes, !bool);
-    var cbRedo = this.setMeshesVisible.bind(this, hideMeshes, bool);
+    let cbUndo = this.setMeshesVisible.bind(this, hideMeshes, !bool);
+    let cbRedo = this.setMeshesVisible.bind(this, hideMeshes, bool);
     this._main.getStateManager().pushStateCustom(cbUndo, cbRedo);
   }
 
   isolate() {
-    var main = this._main;
-    var selMeshes = main.getSelectedMeshes();
-    var meshes = main.getMeshes();
+    let main = this._main;
+    let selMeshes = main.getSelectedMeshes();
+    let meshes = main.getMeshes();
     if (meshes.length === selMeshes.length || meshes.length < 2) {
       this._ctrlIsolate.setValue(false, true);
       return;
     }
 
-    var hideMeshes = [];
-    for (var i = 0; i < meshes.length; ++i) {
-      var id = main.getIndexSelectMesh(meshes[i]);
+    let hideMeshes = [];
+    for (let i = 0; i < meshes.length; ++i) {
+      let id = main.getIndexSelectMesh(meshes[i]);
       if (id < 0) hideMeshes.push(meshes[i]);
     }
 
@@ -208,11 +208,11 @@ class GuiScene {
   }
 
   showAll() {
-    var main = this._main;
-    var meshes = main.getMeshes();
+    let main = this._main;
+    let meshes = main.getMeshes();
 
-    var hideMeshes = [];
-    for (var i = 0; i < meshes.length; ++i) {
+    let hideMeshes = [];
+    for (let i = 0; i < meshes.length; ++i) {
       if (!meshes[i].isVisible()) hideMeshes.push(meshes[i]);
     }
 
@@ -232,13 +232,13 @@ class GuiScene {
   }
 
   onShowGrid(bool) {
-    var main = this._main;
+    let main = this._main;
     main._showGrid = bool;
     main.render();
   }
 
   onShowContour(bool) {
-    var main = this._main;
+    let main = this._main;
     main._showContour = bool;
     main.render();
   }

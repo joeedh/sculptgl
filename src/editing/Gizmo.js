@@ -1,6 +1,6 @@
-import { vec2, vec3, mat4, quat } from 'gl-matrix';
-import Primitives from 'drawables/Primitives';
-import Enums from 'misc/Enums';
+import {vec2, vec3, mat4, quat} from '../lib/gl-matrix.js';
+import Primitives from '../drawables/Primitives.js';
+import Enums from '../misc/Enums.js';
 
 // configs colors
 var COLOR_X = vec3.fromValues(0.7, 0.2, 0.2);
@@ -17,28 +17,28 @@ var ARROW_CONE_THICK = 6.0;
 var ARROW_CONE_LENGTH = 0.25;
 // thickness of tori and arrows
 var THICKNESS = 0.02;
-var THICKNESS_PICK = THICKNESS * 5.0;
+var THICKNESS_PICK = THICKNESS*5.0;
 // radius of tori
 var ROT_RADIUS = 1.5;
-var SCALE_RADIUS = ROT_RADIUS * 1.3;
+var SCALE_RADIUS = ROT_RADIUS*1.3;
 // size of cubes
 var CUBE_SIDE = 0.35;
-var CUBE_SIDE_PICK = CUBE_SIDE * 1.2;
+var CUBE_SIDE_PICK = CUBE_SIDE*1.2;
 
 var _TMP_QUAT = quat.create();
 
 var createGizmo = function (type, nbAxis = -1) {
   return {
     _finalMatrix: mat4.create(),
-    _baseMatrix: mat4.create(),
-    _color: vec3.create(),
+    _baseMatrix : mat4.create(),
+    _color      : vec3.create(),
     _colorSelect: vec3.fromValues(1.0, 1.0, 0.0),
-    _drawGeo: null,
-    _pickGeo: null,
-    _isSelected: false,
-    _type: type,
-    _nbAxis: nbAxis,
-    _lastInter: [0.0, 0.0, 0.0],
+    _drawGeo    : null,
+    _pickGeo    : null,
+    _isSelected : false,
+    _type       : type,
+    _nbAxis     : nbAxis,
+    _lastInter  : [0.0, 0.0, 0.0],
     updateMatrix() {
       mat4.copy(this._drawGeo.getMatrix(), this._finalMatrix);
       mat4.copy(this._pickGeo.getMatrix(), this._finalMatrix);
@@ -50,20 +50,20 @@ var createGizmo = function (type, nbAxis = -1) {
 };
 
 // edit masks
-var TRANS_X = 1 << 0;
-var TRANS_Y = 1 << 1;
-var TRANS_Z = 1 << 2;
-var ROT_X = 1 << 3;
-var ROT_Y = 1 << 4;
-var ROT_Z = 1 << 5;
-var ROT_W = 1 << 6;
-var PLANE_X = 1 << 7;
-var PLANE_Y = 1 << 8;
-var PLANE_Z = 1 << 9;
-var SCALE_X = 1 << 10;
-var SCALE_Y = 1 << 11;
-var SCALE_Z = 1 << 12;
-var SCALE_W = 1 << 13;
+var TRANS_X = 1<<0;
+var TRANS_Y = 1<<1;
+var TRANS_Z = 1<<2;
+var ROT_X = 1<<3;
+var ROT_Y = 1<<4;
+var ROT_Z = 1<<5;
+var ROT_W = 1<<6;
+var PLANE_X = 1<<7;
+var PLANE_Y = 1<<8;
+var PLANE_Z = 1<<9;
+var SCALE_X = 1<<10;
+var SCALE_Y = 1<<11;
+var SCALE_Z = 1<<12;
+var SCALE_W = 1<<13;
 
 var TRANS_XYZ = TRANS_X | TRANS_Y | TRANS_Z;
 var ROT_XYZ = ROT_X | ROT_Y | ROT_Z;
@@ -74,42 +74,55 @@ class Gizmo {
   static get TRANS_X() {
     return TRANS_X;
   }
+
   static get TRANS_Y() {
     return TRANS_Y;
   }
+
   static get TRANS_Z() {
     return TRANS_Z;
   }
+
   static get ROT_X() {
     return ROT_X;
   }
+
   static get ROT_Y() {
     return ROT_Y;
   }
+
   static get ROT_Z() {
     return ROT_Z;
   }
+
   static get ROT_W() {
     return ROT_W;
   }
+
   static get PLANE_X() {
     return PLANE_X;
   }
+
   static get PLANE_Y() {
     return PLANE_Y;
   }
+
   static get PLANE_Z() {
     return PLANE_Z;
   }
+
   static get SCALE_X() {
     return SCALE_X;
   }
+
   static get SCALE_Y() {
     return SCALE_Y;
   }
+
   static get SCALE_Z() {
     return SCALE_Z;
   }
+
   static get SCALE_W() {
     return SCALE_W;
   }
@@ -117,12 +130,15 @@ class Gizmo {
   static get TRANS_XYZ() {
     return TRANS_XYZ;
   }
+
   static get ROT_XYZ() {
     return ROT_XYZ;
   }
+
   static get PLANE_XYZ() {
     return PLANE_XYZ;
   }
+
   static get SCALE_XYZW() {
     return SCALE_XYZW;
   }
@@ -219,15 +235,15 @@ class Gizmo {
 
   _createArrow(tra, axis, color) {
     var mat = tra._baseMatrix;
-    mat4.rotate(mat, mat, Math.PI * 0.5, axis);
-    mat4.translate(mat, mat, [0.0, ARROW_LENGTH * 0.5, 0.0]);
+    mat4.rotate(mat, mat, Math.PI*0.5, axis);
+    mat4.translate(mat, mat, [0.0, ARROW_LENGTH*0.5, 0.0]);
     vec3.copy(tra._color, color);
 
     tra._pickGeo = Primitives.createArrow(
       this._gl,
       THICKNESS_PICK,
       ARROW_LENGTH,
-      ARROW_CONE_THICK * 0.4
+      ARROW_CONE_THICK*0.4
     );
     tra._pickGeo._gizmo = tra;
     tra._drawGeo = Primitives.createArrow(
@@ -255,7 +271,7 @@ class Gizmo {
     this._createArrow(this._transY, vec3.set(axis, 0.0, 1.0, 0.0), COLOR_Y);
     this._createArrow(this._transZ, vec3.set(axis, 1.0, 0.0, 0.0), COLOR_Z);
 
-    var s = ARROW_LENGTH * 0.2;
+    var s = ARROW_LENGTH*0.2;
     this._createPlane(this._planeX, COLOR_X, 0.0, s, 0.0, 0.0, 0.0, s);
     this._createPlane(this._planeY, COLOR_Y, s, 0.0, 0.0, 0.0, 0.0, s);
     this._createPlane(this._planeZ, COLOR_Z, s, 0.0, 0.0, 0.0, s, 0.0);
@@ -266,13 +282,13 @@ class Gizmo {
     rot._pickGeo = Primitives.createTorus(
       this._gl,
       radius,
-      THICKNESS_PICK * mthick,
+      THICKNESS_PICK*mthick,
       rad,
       6,
       64
     );
     rot._pickGeo._gizmo = rot;
-    rot._drawGeo = Primitives.createTorus(this._gl, radius, THICKNESS * mthick, rad, 6, 64);
+    rot._drawGeo = Primitives.createTorus(this._gl, radius, THICKNESS*mthick, rad, 6, 64);
     rot._drawGeo.setShaderType(Enums.Shader.FLAT);
   }
 
@@ -280,12 +296,12 @@ class Gizmo {
     this._createCircle(this._rotX, Math.PI, COLOR_X);
     this._createCircle(this._rotY, Math.PI, COLOR_Y);
     this._createCircle(this._rotZ, Math.PI, COLOR_Z);
-    this._createCircle(this._rotW, Math.PI * 2, COLOR_GREY);
+    this._createCircle(this._rotW, Math.PI*2, COLOR_GREY);
   }
 
   _createCube(sca, axis, color) {
     var mat = sca._baseMatrix;
-    mat4.rotate(mat, mat, Math.PI * 0.5, axis);
+    mat4.rotate(mat, mat, Math.PI*0.5, axis);
     mat4.translate(mat, mat, [0.0, ROT_RADIUS, 0.0]);
     vec3.copy(sca._color, color);
     sca._pickGeo = Primitives.createCube(this._gl, CUBE_SIDE_PICK);
@@ -299,7 +315,7 @@ class Gizmo {
     this._createCube(this._scaleX, vec3.set(axis, 0.0, 0.0, -1.0), COLOR_X);
     this._createCube(this._scaleY, vec3.set(axis, 0.0, 1.0, 0.0), COLOR_Y);
     this._createCube(this._scaleZ, vec3.set(axis, 1.0, 0.0, 0.0), COLOR_Z);
-    this._createCircle(this._scaleW, Math.PI * 2, COLOR_SW, SCALE_RADIUS, 2.0);
+    this._createCircle(this._scaleW, Math.PI*2, COLOR_SW, SCALE_RADIUS, 2.0);
   }
 
   _updateArcRotation(eye) {
@@ -313,7 +329,7 @@ class Gizmo {
     mat4.fromQuat(this._scaleW._baseMatrix, _TMP_QUAT);
 
     // x arc
-    quat.rotateZ(_TMP_QUAT, quat.identity(_TMP_QUAT), Math.PI * 0.5);
+    quat.rotateZ(_TMP_QUAT, quat.identity(_TMP_QUAT), Math.PI*0.5);
     quat.rotateY(_TMP_QUAT, _TMP_QUAT, Math.atan2(-eye[1], -eye[2]));
     mat4.fromQuat(this._rotX._baseMatrix, _TMP_QUAT);
 
@@ -322,7 +338,7 @@ class Gizmo {
     mat4.fromQuat(this._rotY._baseMatrix, _TMP_QUAT);
 
     // z arc
-    quat.rotateX(_TMP_QUAT, quat.identity(_TMP_QUAT), Math.PI * 0.5);
+    quat.rotateX(_TMP_QUAT, quat.identity(_TMP_QUAT), Math.PI*0.5);
     quat.rotateY(_TMP_QUAT, _TMP_QUAT, Math.atan2(-eye[0], eye[1]));
     mat4.fromQuat(this._rotZ._baseMatrix, _TMP_QUAT);
   }
@@ -338,7 +354,7 @@ class Gizmo {
       vec3.transformMat4(icenter, icenter, mesh.getMatrix());
       vec3.add(acc, acc, icenter);
     }
-    vec3.scale(center, acc, 1.0 / meshes.length);
+    vec3.scale(center, acc, 1.0/meshes.length);
     return center;
   }
 
@@ -348,7 +364,7 @@ class Gizmo {
     var eye = camera.computePosition();
 
     this._lastDistToEye = this._isEditing ? this._lastDistToEye : vec3.dist(eye, trMesh);
-    var scaleFactor = (this._lastDistToEye * GIZMO_SIZE) / camera.getConstantScreen();
+    var scaleFactor = (this._lastDistToEye*GIZMO_SIZE)/camera.getConstantScreen();
 
     var traScale = mat4.create();
     mat4.translate(traScale, traScale, trMesh);
@@ -389,10 +405,10 @@ class Gizmo {
     var main = this._main;
     var width = main.getCanvasWidth();
     var height = main.getCanvasHeight();
-    vAr[0] = (x1 / width) * 2.0 - 1.0;
-    vAr[1] = ((height - y1) / height) * 2.0 - 1.0;
-    vAr[3] = (x2 / width) * 2.0 - 1.0;
-    vAr[4] = ((height - y2) / height) * 2.0 - 1.0;
+    vAr[0] = (x1/width)*2.0 - 1.0;
+    vAr[1] = ((height - y1)/height)*2.0 - 1.0;
+    vAr[3] = (x2/width)*2.0 - 1.0;
+    vAr[4] = ((height - y2)/height)*2.0 - 1.0;
     this._lineHelper.updateVertexBuffer();
   }
 
@@ -436,7 +452,7 @@ class Gizmo {
     var dir = this._editLineDirection;
     var sign = this._selected._nbAxis === 0 ? -1.0 : 1.0;
     var lastInter = this._selected._lastInter;
-    vec3.set(dir, -sign * lastInter[2], -sign * lastInter[1], sign * lastInter[0]);
+    vec3.set(dir, -sign*lastInter[2], -sign*lastInter[1], sign*lastInter[0]);
     vec3.transformMat4(dir, dir, this._selected._finalMatrix);
     vec3.copy(dir, camera.project(dir));
 
@@ -508,12 +524,12 @@ class Gizmo {
     this._updateLineHelper(
       origin[0],
       origin[1],
-      origin[0] + dir[0] * dist,
-      origin[1] + dir[1] * dist
+      origin[0] + dir[0]*dist,
+      origin[1] + dir[1]*dist
     );
 
-    var angle = (7 * dist) / Math.min(main.getCanvasWidth(), main.getCanvasHeight());
-    angle %= Math.PI * 2;
+    var angle = (7*dist)/Math.min(main.getCanvasWidth(), main.getCanvasHeight());
+    angle %= Math.PI*2;
     var nbAxis = this._selected._nbAxis;
 
     var meshes = this._main.getSelectedMeshes();
@@ -559,10 +575,10 @@ class Gizmo {
 
     var a01 = -vec3.dot(vec, inter);
     var b0 = vec3.dot(near, vec);
-    var det = Math.abs(1.0 - a01 * a01);
+    var det = Math.abs(1.0 - a01*a01);
 
     var b1 = -vec3.dot(near, inter);
-    inter[this._selected._nbAxis] = (a01 * b0 - b1) / det;
+    inter[this._selected._nbAxis] = (a01*b0 - b1)/det;
 
     this._updateMatrixTranslate(inter);
 
@@ -600,10 +616,10 @@ class Gizmo {
     if (dist1 === dist2) return false;
 
     // intersection between ray and triangle
-    var val = -dist1 / (dist2 - dist1);
-    inter[0] = near[0] + (far[0] - near[0]) * val;
-    inter[1] = near[1] + (far[1] - near[1]) * val;
-    inter[2] = near[2] + (far[2] - near[2]) * val;
+    var val = -dist1/(dist2 - dist1);
+    inter[0] = near[0] + (far[0] - near[0])*val;
+    inter[1] = near[1] + (far[1] - near[1])*val;
+    inter[2] = near[2] + (far[2] - near[2])*val;
 
     this._updateMatrixTranslate(inter);
 
@@ -642,7 +658,7 @@ class Gizmo {
 
     var distOffset = vec3.len(this._editOffset);
     var inter = [1.0, 1.0, 1.0];
-    var scaleMult = Math.max(-0.99, (vec2.dist(origin, vec) - distOffset) / distOffset);
+    var scaleMult = Math.max(-0.99, (vec2.dist(origin, vec) - distOffset)/distOffset);
     if (nbAxis === -1) {
       inter[0] += scaleMult;
       inter[1] += scaleMult;

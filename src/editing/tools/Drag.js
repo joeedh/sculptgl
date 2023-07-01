@@ -1,9 +1,8 @@
-import { vec3, mat4 } from 'gl-matrix';
-import Geometry from 'math3d/Geometry';
-import SculptBase from 'editing/tools/SculptBase';
+import {vec3, mat4} from '../../lib/gl-matrix.js';
+import Geometry from '../../math3d/Geometry.js';
+import SculptBase from './SculptBase.js';
 
 class Drag extends SculptBase {
-
   constructor(main) {
     super(main);
 
@@ -14,21 +13,21 @@ class Drag extends SculptBase {
   }
 
   sculptStroke() {
-    var main = this._main;
-    var mesh = this.getMesh();
-    var picking = main.getPicking();
-    var pickingSym = main.getSculptManager().getSymmetry() ? main.getPickingSymmetry() : null;
+    let main = this._main;
+    let mesh = this.getMesh();
+    let picking = main.getPicking();
+    let pickingSym = main.getSculptManager().getSymmetry() ? main.getPickingSymmetry() : null;
 
-    var dx = main._mouseX - this._lastMouseX;
-    var dy = main._mouseY - this._lastMouseY;
-    var dist = Math.sqrt(dx * dx + dy * dy);
-    var minSpacing = 0.15 * this._radius;
+    let dx = main._mouseX - this._lastMouseX;
+    let dy = main._mouseY - this._lastMouseY;
+    let dist = Math.sqrt(dx*dx + dy*dy);
+    let minSpacing = 0.15*this._radius;
 
-    var step = 1.0 / Math.floor(dist / minSpacing);
+    let step = 1.0/Math.floor(dist/minSpacing);
     dx *= step;
     dy *= step;
-    var mouseX = this._lastMouseX;
-    var mouseY = this._lastMouseY;
+    let mouseX = this._lastMouseX;
+    let mouseY = this._lastMouseY;
 
     if (!picking.getMesh())
       return;
@@ -39,7 +38,7 @@ class Drag extends SculptBase {
       Geometry.mirrorPoint(pickingSym.getIntersectionPoint(), mesh.getSymmetryOrigin(), mesh.getSymmetryNormal());
     }
 
-    for (var i = 0.0; i < 1.0; i += step) {
+    for (let i = 0.0; i < 1.0; i += step) {
       if (!this.makeStroke(mouseX, mouseY, picking, pickingSym))
         break;
       mouseX += dx;
@@ -53,7 +52,7 @@ class Drag extends SculptBase {
   }
 
   makeStroke(mouseX, mouseY, picking, pickingSym) {
-    var mesh = this.getMesh();
+    let mesh = this.getMesh();
     this.updateDragDir(picking, mouseX, mouseY);
     picking.pickVerticesInSphere(picking.getLocalRadius2());
     picking.computePickedNormal();
@@ -74,7 +73,7 @@ class Drag extends SculptBase {
 
   /** On stroke */
   stroke(picking, sym) {
-    var iVertsInRadius = picking.getPickedVertices();
+    let iVertsInRadius = picking.getPickedVertices();
 
     // undo-redo
     this._main.getStateManager().pushVertices(iVertsInRadius);
@@ -84,64 +83,64 @@ class Drag extends SculptBase {
     picking.setIdAlpha(this._idAlpha);
     this.drag(iVertsInRadius, picking.getIntersectionPoint(), picking.getLocalRadius2(), sym, picking);
 
-    var mesh = this.getMesh();
+    let mesh = this.getMesh();
     mesh.updateGeometry(mesh.getFacesFromVertices(iVertsInRadius), iVertsInRadius);
   }
 
   /** Drag deformation */
   drag(iVerts, center, radiusSquared, sym, picking) {
-    var mesh = this.getMesh();
-    var vAr = mesh.getVertices();
-    var mAr = mesh.getMaterials();
-    var radius = Math.sqrt(radiusSquared);
-    var cx = center[0];
-    var cy = center[1];
-    var cz = center[2];
-    var dir = sym ? this._dragDirSym : this._dragDir;
-    var dirx = dir[0];
-    var diry = dir[1];
-    var dirz = dir[2];
-    for (var i = 0, l = iVerts.length; i < l; ++i) {
-      var ind = iVerts[i] * 3;
-      var vx = vAr[ind];
-      var vy = vAr[ind + 1];
-      var vz = vAr[ind + 2];
-      var dx = vx - cx;
-      var dy = vy - cy;
-      var dz = vz - cz;
-      var dist = Math.sqrt(dx * dx + dy * dy + dz * dz) / radius;
-      var fallOff = dist * dist;
-      fallOff = 3.0 * fallOff * fallOff - 4.0 * fallOff * dist + 1.0;
-      fallOff *= mAr[ind + 2] * picking.getAlpha(vx, vy, vz);
-      vAr[ind] = vx + dirx * fallOff;
-      vAr[ind + 1] = vy + diry * fallOff;
-      vAr[ind + 2] = vz + dirz * fallOff;
+    let mesh = this.getMesh();
+    let vAr = mesh.getVertices();
+    let mAr = mesh.getMaterials();
+    let radius = Math.sqrt(radiusSquared);
+    let cx = center[0];
+    let cy = center[1];
+    let cz = center[2];
+    let dir = sym ? this._dragDirSym : this._dragDir;
+    let dirx = dir[0];
+    let diry = dir[1];
+    let dirz = dir[2];
+    for (let i = 0, l = iVerts.length; i < l; ++i) {
+      let ind = iVerts[i]*3;
+      let vx = vAr[ind];
+      let vy = vAr[ind + 1];
+      let vz = vAr[ind + 2];
+      let dx = vx - cx;
+      let dy = vy - cy;
+      let dz = vz - cz;
+      let dist = Math.sqrt(dx*dx + dy*dy + dz*dz)/radius;
+      let fallOff = dist*dist;
+      fallOff = 3.0*fallOff*fallOff - 4.0*fallOff*dist + 1.0;
+      fallOff *= mAr[ind + 2]*picking.getAlpha(vx, vy, vz);
+      vAr[ind] = vx + dirx*fallOff;
+      vAr[ind + 1] = vy + diry*fallOff;
+      vAr[ind + 2] = vz + dirz*fallOff;
     }
   }
 
   /** Set a few infos that will be needed for the drag function afterwards */
   updateDragDir(picking, mouseX, mouseY, useSymmetry) {
-    var mesh = this.getMesh();
-    var vNear = picking.unproject(mouseX, mouseY, 0.0);
-    var vFar = picking.unproject(mouseX, mouseY, 0.1);
-    var matInverse = mat4.create();
+    let mesh = this.getMesh();
+    let vNear = picking.unproject(mouseX, mouseY, 0.0);
+    let vFar = picking.unproject(mouseX, mouseY, 0.1);
+    let matInverse = mat4.create();
     mat4.invert(matInverse, mesh.getMatrix());
     vec3.transformMat4(vNear, vNear, matInverse);
     vec3.transformMat4(vFar, vFar, matInverse);
-    var dir = this._dragDir;
+    let dir = this._dragDir;
     if (useSymmetry) {
       dir = this._dragDirSym;
-      var ptPlane = mesh.getSymmetryOrigin();
-      var nPlane = mesh.getSymmetryNormal();
+      let ptPlane = mesh.getSymmetryOrigin();
+      let nPlane = mesh.getSymmetryNormal();
       Geometry.mirrorPoint(vNear, ptPlane, nPlane);
       Geometry.mirrorPoint(vFar, ptPlane, nPlane);
     }
-    var center = picking.getIntersectionPoint();
+    let center = picking.getIntersectionPoint();
     picking.setIntersectionPoint(Geometry.vertexOnLine(center, vNear, vFar));
     vec3.sub(dir, picking.getIntersectionPoint(), center);
     picking._mesh = mesh;
     picking.updateLocalAndWorldRadius2();
-    var eyeDir = picking.getEyeDirection();
+    let eyeDir = picking.getEyeDirection();
     vec3.sub(eyeDir, vFar, vNear);
     vec3.normalize(eyeDir, eyeDir);
   }

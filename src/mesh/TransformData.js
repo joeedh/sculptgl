@@ -1,4 +1,4 @@
-import { vec3, mat3, mat4 } from 'gl-matrix';
+import { vec3, mat3, mat4 } from '../lib/gl-matrix.js';
 
 var TransformData = function () {
   return {

@@ -1,10 +1,10 @@
-import Utils from 'misc/Utils';
-import StAddRemove from 'states/StateAddRemove';
-import StColorAndMaterial from 'states/StateColorAndMaterial';
-import StGeometry from 'states/StateGeometry';
-import StDynamic from 'states/StateDynamic';
-import StMultiresolution from 'states/StateMultiresolution';
-import StCustom from 'states/StateCustom';
+import Utils from '../misc/Utils.js';
+import StAddRemove from './StateAddRemove.js';
+import StColorAndMaterial from './StateColorAndMaterial.js';
+import StGeometry from './StateGeometry.js';
+import StDynamic from './StateDynamic.js';
+import StMultiresolution from './StateMultiresolution.js';
+import StCustom from './StateCustom.js';
 
 class StateManager {
 
@@ -16,13 +16,13 @@ class StateManager {
   }
 
   pushStateCustom(undocb, redocb, squash) {
-    var st = new StCustom(undocb, redocb);
+    let st = new StCustom(undocb, redocb);
     st.squash = squash;
     this.pushState(st);
   }
 
   pushStateAddRemove(addMesh, remMesh, squash) {
-    var st = new StAddRemove(this._main, addMesh, remMesh);
+    let st = new StAddRemove(this._main, addMesh, remMesh);
     st.squash = squash;
     this.pushState(st);
   }
@@ -55,8 +55,8 @@ class StateManager {
 
   setNewMaxStack(maxStack) {
     StateManager.STACK_LENGTH = maxStack;
-    var undos = this._undos;
-    var redos = this._redos;
+    let undos = this._undos;
+    let redos = this._redos;
     while (this._curUndoIndex >= maxStack) {
       undos.shift();
       --this._curUndoIndex;
@@ -69,7 +69,7 @@ class StateManager {
 
   pushState(state) {
     ++Utils.STATE_FLAG;
-    var undos = this._undos;
+    let undos = this._undos;
     if (this._curUndoIndex === -1) undos.length = 0;
     else if (undos.length >= StateManager.STACK_LENGTH) {
       undos.shift();
@@ -100,8 +100,8 @@ class StateManager {
     if (!this._undos.length || this._curUndoIndex < 0)
       return;
 
-    var state = this.getCurrentState();
-    var redoState = state.createRedo();
+    let state = this.getCurrentState();
+    let redoState = state.createRedo();
     redoState.squash = state.squash;
     this._redos.push(redoState);
     state.undo();
@@ -115,7 +115,7 @@ class StateManager {
     if (!this._redos.length)
       return;
 
-    var state = this._redos[this._redos.length - 1];
+    let state = this._redos[this._redos.length - 1];
     state.redo();
     this._curUndoIndex++;
     this._redos.pop();

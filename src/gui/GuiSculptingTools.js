@@ -1,19 +1,19 @@
-import { vec3 } from 'gl-matrix';
-import Tools from 'editing/tools/Tools';
-import TR from 'gui/GuiTR';
-import Picking from 'math3d/Picking';
-import Enums from 'misc/Enums';
-import Utils from 'misc/Utils';
+import { vec3 } from '../lib/gl-matrix.js';
+import Tools from '../editing/tools/Tools.js';
+import TR from './GuiTR.js';
+import Picking from '../math3d/Picking.js';
+import Enums from '../misc/Enums.js';
+import Utils from '../misc/Utils.js';
 
-var GuiSculptingTools = {};
+let GuiSculptingTools = {};
 GuiSculptingTools.tools = [];
-var GuiTools = GuiSculptingTools.tools;
+let GuiTools = GuiSculptingTools.tools;
 
 GuiSculptingTools.initGuiTools = function (sculpt, menu, main) {
   // init each tools ui
-  for (var i = 0, nbTools = Tools.length; i < nbTools; ++i) {
+  for (let i = 0, nbTools = Tools.length; i < nbTools; ++i) {
     if (!Tools[i]) continue;
-    var uTool = GuiTools[i];
+    let uTool = GuiTools[i];
     if (!uTool) {
       console.error('No gui for tool index : ' + i);
       GuiSculptingTools[i] = {
@@ -27,22 +27,22 @@ GuiSculptingTools.initGuiTools = function (sculpt, menu, main) {
 };
 
 GuiSculptingTools.hide = function (toolIndex) {
-  for (var i = 0, ctrls = GuiTools[toolIndex]._ctrls, nbCtrl = ctrls.length; i < nbCtrl; ++i)
+  for (let i = 0, ctrls = GuiTools[toolIndex]._ctrls, nbCtrl = ctrls.length; i < nbCtrl; ++i)
     ctrls[i].setVisibility(false);
 };
 
 GuiSculptingTools.show = function (toolIndex) {
-  for (var i = 0, ctrls = GuiTools[toolIndex]._ctrls, nbCtrl = ctrls.length; i < nbCtrl; ++i)
+  for (let i = 0, ctrls = GuiTools[toolIndex]._ctrls, nbCtrl = ctrls.length; i < nbCtrl; ++i)
     ctrls[i].setVisibility(true);
 };
 
-var setOnChange = function (key, factor, val) {
+let setOnChange = function (key, factor, val) {
   this[key] = factor ? val / factor : val;
 };
 
 // some helper functions
-var addCtrlRadius = function (tool, fold, widget, main) {
-  var ctrl = fold.addSlider(TR('sculptRadius'), tool._radius, function (val) {
+let addCtrlRadius = function (tool, fold, widget, main) {
+  let ctrl = fold.addSlider(TR('sculptRadius'), tool._radius, function (val) {
     setOnChange.call(tool, '_radius', 1, val);
     main.getSculptManager().getSelection().setIsEditMode(true);
     main.renderSelectOverRtt();
@@ -50,29 +50,29 @@ var addCtrlRadius = function (tool, fold, widget, main) {
   widget._ctrlRadius = ctrl;
   return ctrl;
 };
-var addCtrlIntensity = function (tool, fold, widget) {
-  var ctrl = fold.addSlider(TR('sculptIntensity'), tool._intensity * 100, setOnChange.bind(tool, '_intensity', 100), 0, 100, 1);
+let addCtrlIntensity = function (tool, fold, widget) {
+  let ctrl = fold.addSlider(TR('sculptIntensity'), tool._intensity * 100, setOnChange.bind(tool, '_intensity', 100), 0, 100, 1);
   widget._ctrlIntensity = ctrl;
   return ctrl;
 };
-var addCtrlHardness = function (tool, fold) {
+let addCtrlHardness = function (tool, fold) {
   return fold.addSlider(TR('sculptHardness'), tool._hardness * 100, setOnChange.bind(tool, '_hardness', 100), 0, 100, 1);
 };
-var addCtrlCulling = function (tool, fold) {
+let addCtrlCulling = function (tool, fold) {
   return fold.addCheckbox(TR('sculptCulling'), tool, '_culling');
 };
-var addCtrlNegative = function (tool, fold, widget, name) {
-  var ctrl = fold.addCheckbox(name || TR('sculptNegative'), tool, '_negative');
+let addCtrlNegative = function (tool, fold, widget, name) {
+  let ctrl = fold.addCheckbox(name || TR('sculptNegative'), tool, '_negative');
   widget.toggleNegative = function () {
     ctrl.setValue(!ctrl.getValue());
   };
   return ctrl;
 };
 
-var importAlpha = function () {
+let importAlpha = function () {
   document.getElementById('alphaopen').click();
 };
-var addCtrlAlpha = function (ctrls, fold, tool, ui) {
+let addCtrlAlpha = function (ctrls, fold, tool, ui) {
   ctrls.push(fold.addTitle(TR('sculptAlphaTitle')));
   if (tool._lockPosition !== undefined)
     ctrls.push(fold.addCheckbox(TR('sculptLockPositon'), tool, '_lockPosition'));
@@ -142,7 +142,7 @@ GuiTools[Enums.Tools.PAINT] = {
     tool._material[0] = materials[1].getValue() / 100;
     tool._material[1] = materials[2].getValue() / 100;
 
-    var mesh = main.getMesh();
+    let mesh = main.getMesh();
     if (!mesh) return;
 
     if (tool._writeAlbedo) mesh.setAlbedo(tool._color);
@@ -154,7 +154,7 @@ GuiTools[Enums.Tools.PAINT] = {
     if (this._ctrlPicker.getValue() !== tool._pickColor)
       this._ctrlPicker.setValue(tool._pickColor);
 
-    var mesh = main.getMesh();
+    let mesh = main.getMesh();
     if (!mesh || !mesh.getAlbedo) return;
 
     mesh.getAlbedo()[0] = -1.0;
@@ -188,11 +188,11 @@ GuiTools[Enums.Tools.PAINT] = {
     this._ctrlPicker = fold.addCheckbox(TR('sculptPickColor'), tool._pickColor, this.onColorPick.bind(this, tool, main));
     this._ctrls.push(this._ctrlPicker);
 
-    var materials = [];
-    var cbMatChanged = this.onMaterialChanged.bind(this, main, tool, materials);
-    var ctrlColor = fold.addColor(TR('sculptColor'), tool._color, cbMatChanged);
-    var ctrlRoughness = fold.addSlider(TR('sculptRoughness'), tool._material[0] * 100, cbMatChanged, 0, 100, 1);
-    var ctrlMetallic = fold.addSlider(TR('sculptMetallic'), tool._material[1] * 100, cbMatChanged, 0, 100, 1);
+    let materials = [];
+    let cbMatChanged = this.onMaterialChanged.bind(this, main, tool, materials);
+    let ctrlColor = fold.addColor(TR('sculptColor'), tool._color, cbMatChanged);
+    let ctrlRoughness = fold.addSlider(TR('sculptRoughness'), tool._material[0] * 100, cbMatChanged, 0, 100, 1);
+    let ctrlMetallic = fold.addSlider(TR('sculptMetallic'), tool._material[1] * 100, cbMatChanged, 0, 100, 1);
     materials.push(ctrlColor, ctrlRoughness, ctrlMetallic);
     this._ctrls.push(ctrlColor, ctrlRoughness, ctrlMetallic);
     tool.setPickCallback(this.onPickedMaterial.bind(this, materials, tool, main));
@@ -271,8 +271,8 @@ GuiTools[Enums.Tools.MASKING] = {
     this._ctrls.push(addCtrlCulling(tool, fold));
     this._main = main;
     this._tool = tool;
-    var bci = fold.addDualButton(TR('sculptMaskingClear'), TR('sculptMaskingInvert'), tool, tool, 'clear', 'invert');
-    var bbs = fold.addDualButton(TR('sculptMaskingBlur'), TR('sculptMaskingSharpen'), tool, tool, 'blur', 'sharpen');
+    let bci = fold.addDualButton(TR('sculptMaskingClear'), TR('sculptMaskingInvert'), tool, tool, 'clear', 'invert');
+    let bbs = fold.addDualButton(TR('sculptMaskingBlur'), TR('sculptMaskingSharpen'), tool, tool, 'blur', 'sharpen');
     this._ctrls.push(bci[0], bci[1], bbs[0], bbs[1]);
     // mask extract
     this._ctrls.push(fold.addTitle(TR('sculptExtractTitle')));

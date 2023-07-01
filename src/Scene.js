@@ -1,23 +1,23 @@
-import { vec3, mat4 } from 'gl-matrix';
-import getOptionsURL from 'misc/getOptionsURL';
-import Enums from 'misc/Enums';
-import Utils from 'misc/Utils';
-import SculptManager from 'editing/SculptManager';
-import Subdivision from 'editing/Subdivision';
-import Import from 'files/Import';
-import Gui from 'gui/Gui';
-import Camera from 'math3d/Camera';
-import Picking from 'math3d/Picking';
-import Background from 'drawables/Background';
-import Mesh from 'mesh/Mesh';
-import Multimesh from 'mesh/multiresolution/Multimesh';
-import Primitives from 'drawables/Primitives';
-import StateManager from 'states/StateManager';
-import RenderData from 'mesh/RenderData';
-import Rtt from 'drawables/Rtt';
-import ShaderLib from 'render/ShaderLib';
-import MeshStatic from 'mesh/meshStatic/MeshStatic';
-import WebGLCaps from 'render/WebGLCaps';
+import { vec3, mat4 } from './lib/gl-matrix.js';
+import getOptionsURL from './misc/getOptionsURL.js';
+import Enums from './misc/Enums.js';
+import Utils from './misc/Utils.js';
+import SculptManager from './editing/SculptManager.js';
+import Subdivision from './editing/Subdivision.js';
+import Import from './files/Import.js';
+import Gui from './gui/Gui.js';
+import Camera from './math3d/Camera.js';
+import Picking from './math3d/Picking.js';
+import Background from './drawables/Background.js';
+import Mesh from './mesh/Mesh.js';
+import Multimesh from './mesh/multiresolution/Multimesh.js';
+import Primitives from './drawables/Primitives.js';
+import StateManager from './states/StateManager.js';
+import RenderData from './mesh/RenderData.js';
+import Rtt from './drawables/Rtt.js';
+import ShaderLib from './render/ShaderLib.js';
+import MeshStatic from './mesh/meshStatic/MeshStatic.js';
+import WebGLCaps from './render/WebGLCaps.js';
 
 class Scene {
 
@@ -403,6 +403,7 @@ class Scene {
     var ShaderMatcap = ShaderLib[Enums.Shader.MATCAP];
 
     var loadTex = function (path, idMaterial) {
+      path = "app/" + path;
       var mat = new Image();
       mat.src = path;
 

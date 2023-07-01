@@ -1,15 +1,15 @@
-import Utils from 'misc/Utils';
-import MeshStatic from 'mesh/meshStatic/MeshStatic';
-import ExportSGL from 'files/ExportSGL';
-import ShaderBase from 'render/shaders/ShaderBase';
+import Utils from '../misc/Utils.js';
+import MeshStatic from '../mesh/meshStatic/MeshStatic.js';
+import ExportSGL from '../files/ExportSGL.js';
+import ShaderBase from '../render/shaders/ShaderBase.js';
 
 var Import = {};
 
 var handleNegativeIndexFace = function (i32) {
   var u32 = new Uint32Array(i32);
-  var nbFaces = u32.length / 4;
+  var nbFaces = u32.length/4;
   for (var i = 0; i < nbFaces; ++i) {
-    var idd = i * 4 + 3;
+    var idd = i*4 + 3;
     if (i32[idd] < 0)
       u32[idd] = Utils.TRI_INDEX;
   }
@@ -69,48 +69,48 @@ Import.importSGL = function (buffer, gl, main) {
 
     // vertices
     var nbElts = u32a[off++];
-    mesh.setVertices(f32a.subarray(off, off + nbElts * 3));
-    off += nbElts * 3;
+    mesh.setVertices(f32a.subarray(off, off + nbElts*3));
+    off += nbElts*3;
 
     // colors
     nbElts = u32a[off++];
     if (nbElts > 0)
-      mesh.setColors(f32a.subarray(off, off + nbElts * 3));
-    off += nbElts * 3;
+      mesh.setColors(f32a.subarray(off, off + nbElts*3));
+    off += nbElts*3;
 
     // materials
     nbElts = u32a[off++];
     if (nbElts > 0)
-      mesh.setMaterials(f32a.subarray(off, off + nbElts * 3));
-    off += nbElts * 3;
+      mesh.setMaterials(f32a.subarray(off, off + nbElts*3));
+    off += nbElts*3;
 
     // faces
     nbElts = u32a[off++];
     if (version <= 2) {
-      mesh.setFaces(handleNegativeIndexFace(i32a.subarray(off, off + nbElts * 4)));
+      mesh.setFaces(handleNegativeIndexFace(i32a.subarray(off, off + nbElts*4)));
     } else {
-      mesh.setFaces(u32a.subarray(off, off + nbElts * 4));
+      mesh.setFaces(u32a.subarray(off, off + nbElts*4));
     }
-    off += nbElts * 4;
+    off += nbElts*4;
 
     // uvs
     nbElts = u32a[off++];
     var uv = null;
     if (nbElts)
-      uv = f32a.subarray(off, off + nbElts * 2);
-    off += nbElts * 2;
+      uv = f32a.subarray(off, off + nbElts*2);
+    off += nbElts*2;
 
     // face uvs
     nbElts = u32a[off++];
     var fuv = null;
     if (nbElts) {
       if (version <= 2) {
-        fuv = handleNegativeIndexFace(i32a.subarray(off, off + nbElts * 4));
+        fuv = handleNegativeIndexFace(i32a.subarray(off, off + nbElts*4));
       } else {
-        fuv = u32a.subarray(off, off + nbElts * 4);
+        fuv = u32a.subarray(off, off + nbElts*4);
       }
     }
-    off += nbElts * 4;
+    off += nbElts*4;
 
     if (uv && fuv)
       mesh.initTexCoordsDataFromOBJData(uv, fuv);

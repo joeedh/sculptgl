@@ -1,6 +1,6 @@
-import { vec3, mat4 } from 'gl-matrix';
-import Geometry from 'math3d/Geometry';
-import SculptBase from 'editing/tools/SculptBase';
+import {vec3, mat4} from '../../lib/gl-matrix.js';
+import Geometry from '../../math3d/Geometry.js';
+import SculptBase from './SculptBase.js';
 
 class Move extends SculptBase {
 
@@ -13,24 +13,24 @@ class Move extends SculptBase {
     this._negative = false; // along normal
     this._moveData = {
       center: [0.0, 0.0, 0.0],
-      dir: [0.0, 0.0],
+      dir   : [0.0, 0.0],
       vProxy: null
     };
     this._moveDataSym = {
       center: [0.0, 0.0, 0.0],
-      dir: [0.0, 0.0],
+      dir   : [0.0, 0.0],
       vProxy: null
     };
     this._idAlpha = 0;
   }
 
   startSculpt() {
-    var main = this._main;
-    var picking = main.getPicking();
+    let main = this._main;
+    let picking = main.getPicking();
     this.initMoveData(picking, this._moveData);
 
     if (main.getSculptManager().getSymmetry()) {
-      var pickingSym = main.getPickingSymmetry();
+      let pickingSym = main.getPickingSymmetry();
       pickingSym.intersectionMouseMesh();
       pickingSym.setLocalRadius2(picking.getLocalRadius2());
 
@@ -45,16 +45,16 @@ class Move extends SculptBase {
     else
       picking.pickVerticesInSphere(picking.getLocalRadius2());
     vec3.copy(moveData.center, picking.getIntersectionPoint());
-    var iVerts = picking.getPickedVertices();
+    let iVerts = picking.getPickedVertices();
     // undo-redo
     this._main.getStateManager().pushVertices(iVerts);
 
-    var vAr = picking.getMesh().getVertices();
-    var nbVerts = iVerts.length;
-    var vProxy = moveData.vProxy = new Float32Array(nbVerts * 3);
-    for (var i = 0; i < nbVerts; ++i) {
-      var ind = iVerts[i] * 3;
-      var j = i * 3;
+    let vAr = picking.getMesh().getVertices();
+    let nbVerts = iVerts.length;
+    let vProxy = moveData.vProxy = new Float32Array(nbVerts*3);
+    for (let i = 0; i < nbVerts; ++i) {
+      let ind = iVerts[i]*3;
+      let j = i*3;
       vProxy[j] = vAr[ind];
       vProxy[j + 1] = vAr[ind + 1];
       vProxy[j + 2] = vAr[ind + 2];
@@ -62,12 +62,12 @@ class Move extends SculptBase {
   }
 
   copyVerticesProxy(picking, moveData) {
-    var iVerts = picking.getPickedVertices();
-    var vAr = this.getMesh().getVertices();
-    var vProxy = moveData.vProxy;
-    for (var i = 0, nbVerts = iVerts.length; i < nbVerts; ++i) {
-      var ind = iVerts[i] * 3;
-      var j = i * 3;
+    let iVerts = picking.getPickedVertices();
+    let vAr = this.getMesh().getVertices();
+    let vProxy = moveData.vProxy;
+    for (let i = 0, nbVerts = iVerts.length; i < nbVerts; ++i) {
+      let ind = iVerts[i]*3;
+      let j = i*3;
       vAr[ind] = vProxy[j];
       vAr[ind + 1] = vProxy[j + 1];
       vAr[ind + 2] = vProxy[j + 2];
@@ -75,10 +75,10 @@ class Move extends SculptBase {
   }
 
   sculptStroke() {
-    var main = this._main;
-    var picking = main.getPicking();
-    var pickingSym = main.getPickingSymmetry();
-    var useSym = main.getSculptManager().getSymmetry() && pickingSym.getMesh();
+    let main = this._main;
+    let picking = main.getPicking();
+    let pickingSym = main.getPickingSymmetry();
+    let useSym = main.getSculptManager().getSymmetry() && pickingSym.getMesh();
 
     picking.updateAlpha(this._lockPosition);
     picking.setIdAlpha(this._idAlpha);
@@ -91,8 +91,8 @@ class Move extends SculptBase {
     if (useSym)
       this.copyVerticesProxy(pickingSym, this._moveDataSym);
 
-    var mouseX = main._mouseX;
-    var mouseY = main._mouseY;
+    let mouseX = main._mouseX;
+    let mouseY = main._mouseY;
     this.updateMoveDir(picking, mouseX, mouseY);
     this.move(picking.getPickedVertices(), picking.getIntersectionPoint(), picking.getLocalRadius2(), this._moveData, picking);
 
@@ -101,7 +101,7 @@ class Move extends SculptBase {
       this.move(pickingSym.getPickedVertices(), pickingSym.getIntersectionPoint(), pickingSym.getLocalRadius2(), this._moveDataSym, pickingSym);
     }
 
-    var mesh = this.getMesh();
+    let mesh = this.getMesh();
     mesh.updateGeometry(mesh.getFacesFromVertices(picking.getPickedVertices()), picking.getPickedVertices());
     if (useSym)
       mesh.updateGeometry(mesh.getFacesFromVertices(pickingSym.getPickedVertices()), pickingSym.getPickedVertices());
@@ -110,56 +110,56 @@ class Move extends SculptBase {
   }
 
   move(iVerts, center, radiusSquared, moveData, picking) {
-    var mesh = this.getMesh();
-    var vAr = mesh.getVertices();
-    var mAr = mesh.getMaterials();
-    var radius = Math.sqrt(radiusSquared);
-    var vProxy = moveData.vProxy;
-    var cx = center[0];
-    var cy = center[1];
-    var cz = center[2];
-    var dir = moveData.dir;
-    var dirx = dir[0];
-    var diry = dir[1];
-    var dirz = dir[2];
-    for (var i = 0, l = iVerts.length; i < l; ++i) {
-      var ind = iVerts[i] * 3;
-      var j = i * 3;
-      var vx = vProxy[j];
-      var vy = vProxy[j + 1];
-      var vz = vProxy[j + 2];
-      var dx = vx - cx;
-      var dy = vy - cy;
-      var dz = vz - cz;
-      var dist = Math.sqrt(dx * dx + dy * dy + dz * dz) / radius;
-      var fallOff = dist * dist;
-      fallOff = 3.0 * fallOff * fallOff - 4.0 * fallOff * dist + 1.0;
-      fallOff *= mAr[ind + 2] * picking.getAlpha(vx, vy, vz);
-      vAr[ind] += dirx * fallOff;
-      vAr[ind + 1] += diry * fallOff;
-      vAr[ind + 2] += dirz * fallOff;
+    let mesh = this.getMesh();
+    let vAr = mesh.getVertices();
+    let mAr = mesh.getMaterials();
+    let radius = Math.sqrt(radiusSquared);
+    let vProxy = moveData.vProxy;
+    let cx = center[0];
+    let cy = center[1];
+    let cz = center[2];
+    let dir = moveData.dir;
+    let dirx = dir[0];
+    let diry = dir[1];
+    let dirz = dir[2];
+    for (let i = 0, l = iVerts.length; i < l; ++i) {
+      let ind = iVerts[i]*3;
+      let j = i*3;
+      let vx = vProxy[j];
+      let vy = vProxy[j + 1];
+      let vz = vProxy[j + 2];
+      let dx = vx - cx;
+      let dy = vy - cy;
+      let dz = vz - cz;
+      let dist = Math.sqrt(dx*dx + dy*dy + dz*dz)/radius;
+      let fallOff = dist*dist;
+      fallOff = 3.0*fallOff*fallOff - 4.0*fallOff*dist + 1.0;
+      fallOff *= mAr[ind + 2]*picking.getAlpha(vx, vy, vz);
+      vAr[ind] += dirx*fallOff;
+      vAr[ind + 1] += diry*fallOff;
+      vAr[ind + 2] += dirz*fallOff;
     }
   }
 
   updateMoveDir(picking, mouseX, mouseY, useSymmetry) {
-    var mesh = this.getMesh();
-    var vNear = picking.unproject(mouseX, mouseY, 0.0);
-    var vFar = picking.unproject(mouseX, mouseY, 0.1);
-    var matInverse = mat4.create();
+    let mesh = this.getMesh();
+    let vNear = picking.unproject(mouseX, mouseY, 0.0);
+    let vFar = picking.unproject(mouseX, mouseY, 0.1);
+    let matInverse = mat4.create();
     mat4.invert(matInverse, mesh.getMatrix());
     vec3.transformMat4(vNear, vNear, matInverse);
     vec3.transformMat4(vFar, vFar, matInverse);
 
-    var moveData = useSymmetry ? this._moveDataSym : this._moveData;
+    let moveData = useSymmetry ? this._moveDataSym : this._moveData;
     if (useSymmetry) {
-      var ptPlane = mesh.getSymmetryOrigin();
-      var nPlane = mesh.getSymmetryNormal();
+      let ptPlane = mesh.getSymmetryOrigin();
+      let nPlane = mesh.getSymmetryNormal();
       Geometry.mirrorPoint(vNear, ptPlane, nPlane);
       Geometry.mirrorPoint(vFar, ptPlane, nPlane);
     }
 
     if (this._negative) {
-      var len = vec3.dist(Geometry.vertexOnLine(moveData.center, vNear, vFar), moveData.center);
+      let len = vec3.dist(Geometry.vertexOnLine(moveData.center, vNear, vFar), moveData.center);
       vec3.normalize(moveData.dir, picking.computePickedNormal());
       vec3.scale(moveData.dir, moveData.dir, mouseX < this._lastMouseX ? -len : len);
     } else {
@@ -167,7 +167,7 @@ class Move extends SculptBase {
     }
     vec3.scale(moveData.dir, moveData.dir, this._intensity);
 
-    var eyeDir = picking.getEyeDirection();
+    let eyeDir = picking.getEyeDirection();
     vec3.sub(eyeDir, vFar, vNear);
     vec3.normalize(eyeDir, eyeDir);
   }

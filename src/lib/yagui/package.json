@@ -1,0 +1,55 @@
+{
+  "_args": [
+    [
+      "yagui@2.0.2",
+      "C:\\dev\\sculptgl"
+    ]
+  ],
+  "_from": "yagui@2.0.2",
+  "_id": "yagui@2.0.2",
+  "_inBundle": false,
+  "_integrity": "sha512-isIubX8AWkFD+xD4oHa+x0xp6z86+XZYnAPIbAS06eZtxm8MkAlDYjsVAlpU9iya/+Tr02e6wIJXt0pJrWuyUA==",
+  "_location": "/yagui",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "version",
+    "registry": true,
+    "raw": "yagui@2.0.2",
+    "name": "yagui",
+    "escapedName": "yagui",
+    "rawSpec": "2.0.2",
+    "saveSpec": null,
+    "fetchSpec": "2.0.2"
+  },
+  "_requiredBy": [
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/yagui/-/yagui-2.0.2.tgz",
+  "_spec": "2.0.2",
+  "_where": "C:\\dev\\sculptgl",
+  "author": {
+    "name": "Stéphane GINIER"
+  },
+  "bugs": {
+    "url": "https://github.com/stephomi/yagui/issues"
+  },
+  "description": "Yet another javascript gui (for canvas centered WebGL app)",
+  "devDependencies": {
+    "@babel/core": "^7.6.2",
+    "@babel/preset-env": "^7.6.2",
+    "babel-loader": "^8.0.6"
+  },
+  "homepage": "https://github.com/stephomi/yagui",
+  "license": "MIT",
+  "main": "build/yagui.js",
+  "name": "yagui",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stephomi/yagui.git"
+  },
+  "scripts": {
+    "dev": "webpack -w",
+    "release": "webpack --env.release"
+  },
+  "version": "2.0.2"
+}

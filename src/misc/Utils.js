@@ -1,6 +1,6 @@
-import { vec3 } from 'gl-matrix';
+import { vec3 } from '../lib/gl-matrix.js';
 
-var Utils = {};
+let Utils = {};
 
 Utils.SCALE = 100.0; // scale factor
 Utils.TAG_FLAG = 1; // flag value for comparison (always >= tags values)
@@ -21,24 +21,24 @@ Utils.sRGBToLinear1 = function (x) {
 };
 
 Utils.extend = function (dest, src) {
-  var keys = Object.keys(src);
-  for (var i = 0, l = keys.length; i < l; ++i) {
-    var key = keys[i];
+  let keys = Object.keys(src);
+  for (let i = 0, l = keys.length; i < l; ++i) {
+    let key = keys[i];
     if (dest[key] === undefined) dest[key] = src[key];
   }
   return dest;
 };
 
 Utils.invert = function (obj) {
-  var keys = Object.keys(obj);
-  var inv = {};
-  for (var i = 0, nbkeys = keys.length; i < nbkeys; ++i)
+  let keys = Object.keys(obj);
+  let inv = {};
+  for (let i = 0, nbkeys = keys.length; i < nbkeys; ++i)
     inv[obj[keys[i]]] = keys[i];
   return inv;
 };
 
 Utils.replaceElement = function (array, oldValue, newValue) {
-  for (var i = 0, l = array.length; i < l; ++i) {
+  for (let i = 0, l = array.length; i < l; ++i) {
     if (array[i] === oldValue) {
       array[i] = newValue;
       return;
@@ -47,7 +47,7 @@ Utils.replaceElement = function (array, oldValue, newValue) {
 };
 
 Utils.removeElement = function (array, remValue) {
-  for (var i = 0, l = array.length; i < l; ++i) {
+  for (let i = 0, l = array.length; i < l; ++i) {
     if (array[i] === remValue) {
       array[i] = array[l - 1];
       array.pop();
@@ -57,10 +57,10 @@ Utils.removeElement = function (array, remValue) {
 };
 
 Utils.appendArray = function (array1, array2) {
-  var nb1 = array1.length;
-  var nb2 = array2.length;
+  let nb1 = array1.length;
+  let nb2 = array2.length;
   array1.length += nb2;
-  for (var i = 0; i < nb2; ++i)
+  for (let i = 0; i < nb2; ++i)
     array1[nb1 + i] = array2[i];
 };
 
@@ -72,21 +72,21 @@ Utils.isPowerOfTwo = function (x) {
 /** Return the nearest power of two value */
 Utils.nextHighestPowerOfTwo = function (x) {
   --x;
-  for (var i = 1; i < 32; i <<= 1)
+  for (let i = 1; i < 32; i <<= 1)
     x = x | x >> i;
   return x + 1;
 };
 
-var sortFunc = function (a, b) {
+let sortFunc = function (a, b) {
   return a - b;
 };
 
 /** sort an array and delete duplicate values */
 Utils.tidy = function (array) {
   array.sort(sortFunc);
-  var len = array.length;
-  var i = 0;
-  var j = 0;
+  let len = array.length;
+  let i = 0;
+  let j = 0;
   for (i = 1; i < len; ++i) {
     if (array[j] !== array[i])
       array[++j] = array[i];
@@ -97,12 +97,12 @@ Utils.tidy = function (array) {
 
 /** Intersection between two arrays */
 Utils.intersectionArrays = function (a, b) {
-  var ai = 0;
-  var bi = 0;
-  var result = [];
+  let ai = 0;
+  let bi = 0;
+  let result = [];
 
-  var aLen = a.length;
-  var bLen = b.length;
+  let aLen = a.length;
+  let bLen = b.length;
   while (ai < aLen && bi < bLen) {
     if (a[ai] < b[bi]) ai++;
     else if (a[ai] > b[bi]) bi++;
@@ -116,7 +116,7 @@ Utils.intersectionArrays = function (a, b) {
 };
 
 Utils.littleEndian = (function () {
-  var buffer = new ArrayBuffer(2);
+  let buffer = new ArrayBuffer(2);
   new DataView(buffer).setInt16(0, 256, true);
   return new Int16Array(buffer)[0] === 256;
 })();
@@ -128,13 +128,13 @@ Utils.getBytes = function (data, offset) {
 
 /** Read a binary uint32 */
 Utils.getUint32 = function (data, offset) {
-  var b = Utils.getBytes(data, offset);
+  let b = Utils.getBytes(data, offset);
   return (b[0] << 0) | (b[1] << 8) | (b[2] << 16) | (b[3] << 24);
 };
 
 /** Read a binary float32 */
 Utils.getFloat32 = function (data, offset) {
-  var b = Utils.getBytes(data, offset),
+  let b = Utils.getBytes(data, offset),
     sign = 1 - (2 * (b[3] >> 7)),
     exponent = (((b[3] << 1) & 0xff) | (b[2] >> 7)) - 127,
     mantissa = ((b[2] & 0x7f) << 16) | (b[1] << 8) | b[0];
@@ -152,11 +152,11 @@ Utils.getFloat32 = function (data, offset) {
 
 /** Array buffer to string utf-8 */
 Utils.ab2str = function (buf) {
-  var str = '';
-  var ab = new Uint8Array(buf);
-  var chunkSize = 65535;
-  for (var off = 0, abLen = ab.length; off < abLen; off += chunkSize) {
-    var subab = ab.subarray(off, chunkSize < abLen - off ? chunkSize + off : abLen);
+  let str = '';
+  let ab = new Uint8Array(buf);
+  let chunkSize = 65535;
+  for (let off = 0, abLen = ab.length; off < abLen; off += chunkSize) {
+    let subab = ab.subarray(off, chunkSize < abLen - off ? chunkSize + off : abLen);
     str += String.fromCharCode.apply(null, subab);
   }
   return str;
@@ -164,7 +164,7 @@ Utils.ab2str = function (buf) {
 
 /** Return a buffer array which is at least nbBytes long */
 Utils.getMemory = (function () {
-  var pool = new ArrayBuffer(100000);
+  let pool = new ArrayBuffer(100000);
   return function (nbBytes) {
     if (pool.byteLength >= nbBytes)
       return pool;
@@ -179,21 +179,21 @@ Utils.now = Date.now || function () {
 };
 
 Utils.throttle = function (func, wait) {
-  var result;
-  var args = [];
-  var timeout = null;
-  var previous = 0;
-  var later = function () {
+  let result;
+  let args = [];
+  let timeout = null;
+  let previous = 0;
+  let later = function () {
     previous = Utils.now();
     timeout = null;
     result = func.apply(func, args);
   };
   return function () {
-    var now = Utils.now();
-    var remaining = wait - (now - previous);
+    let now = Utils.now();
+    let remaining = wait - (now - previous);
 
-    var nbArgs = args.length = arguments.length;
-    for (var i = 0; i < nbArgs; ++i)
+    let nbArgs = args.length = arguments.length;
+    for (let i = 0; i < nbArgs; ++i)
       args[i] = arguments[i];
 
     if (remaining <= 0 || remaining > wait) {
@@ -209,12 +209,12 @@ Utils.throttle = function (func, wait) {
 };
 
 Utils.normalizeArrayVec3 = function (array, arrayOut = array) {
-  for (var i = 0, l = array.length / 3; i < l; ++i) {
-    var j = i * 3;
-    var nx = array[j];
-    var ny = array[j + 1];
-    var nz = array[j + 2];
-    var len = nx * nx + ny * ny + nz * nz;
+  for (let i = 0, l = array.length / 3; i < l; ++i) {
+    let j = i * 3;
+    let nx = array[j];
+    let ny = array[j + 1];
+    let nz = array[j + 2];
+    let len = nx * nx + ny * ny + nz * nz;
     if (len === 0) {
       arrayOut[j] = 1.0;
       continue;
@@ -228,28 +228,28 @@ Utils.normalizeArrayVec3 = function (array, arrayOut = array) {
 };
 
 Utils.convertArrayVec3toSRGB = function (array, arrayOut = array) {
-  for (var i = 0, l = array.length; i < l; ++i) {
+  for (let i = 0, l = array.length; i < l; ++i) {
     arrayOut[i] = Utils.linearToSRGB1(array[i]);
   }
   return arrayOut;
 };
 
 Utils.convertArrayVec3toLinear = function (array, arrayOut = array) {
-  for (var i = 0, l = array.length; i < l; ++i) {
+  for (let i = 0, l = array.length; i < l; ++i) {
     arrayOut[i] = Utils.sRGBToLinear1(array[i]);
   }
   return arrayOut;
 };
 
 Utils.computeWorldVertices = function (mesh, arrayOut) {
-  var nbVertices = mesh.getNbVertices();
-  var array = mesh.getVertices().subarray(0, nbVertices * 3);
+  let nbVertices = mesh.getNbVertices();
+  let array = mesh.getVertices().subarray(0, nbVertices * 3);
   if (!arrayOut) arrayOut = new Float32Array(nbVertices * 3);
 
-  var matrix = mesh.getMatrix();
-  var tmp = vec3.create();
-  for (var i = 0; i < nbVertices; ++i) {
-    var id = i * 3;
+  let matrix = mesh.getMatrix();
+  let tmp = vec3.create();
+  for (let i = 0; i < nbVertices; ++i) {
+    let id = i * 3;
     vec3.set(tmp, array[id], array[id + 1], array[id + 2]);
     vec3.transformMat4(tmp, tmp, matrix);
     arrayOut[id] = tmp[0];

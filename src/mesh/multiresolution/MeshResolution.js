@@ -1,7 +1,7 @@
-import Utils from 'misc/Utils';
-import Subdivision from 'editing/Subdivision';
-import Mesh from 'mesh/Mesh';
-import createMeshData from 'mesh/MeshData';
+import Utils from '../../misc/Utils.js';
+import Subdivision from '../../editing/Subdivision.js';
+import Mesh from '../Mesh.js';
+import createMeshData from '../MeshData.js';
 
 class MeshResolution extends Mesh {
 
@@ -20,7 +20,8 @@ class MeshResolution extends Mesh {
     this._evenMapping = false; // if the even vertices are not aligned with higher res
   }
 
-  optimize() {}
+  optimize() {
+  }
 
   getEvenMapping() {
     return this._evenMapping;
@@ -47,33 +48,33 @@ class MeshResolution extends Mesh {
   /** Go to one level below (up to down) */
   lowerAnalysis(meshUp) {
     this.copyDataFromHigherRes(meshUp);
-    var nbVertices = meshUp.getNbVertices();
-    var subdVerts = new Float32Array(nbVertices * 3);
-    var subdColors = new Float32Array(nbVertices * 3);
-    var subdMaterials = new Float32Array(nbVertices * 3);
+    let nbVertices = meshUp.getNbVertices();
+    let subdVerts = new Float32Array(nbVertices*3);
+    let subdColors = new Float32Array(nbVertices*3);
+    let subdMaterials = new Float32Array(nbVertices*3);
 
     this.computePartialSubdivision(subdVerts, subdColors, subdMaterials, nbVertices);
     meshUp.computeDetails(subdVerts, subdColors, subdMaterials, nbVertices);
   }
 
   copyDataFromHigherRes(meshUp) {
-    var vArDown = this.getVertices();
-    var cArDown = this.getColors();
-    var mArDown = this.getMaterials();
-    var nbVertices = this.getNbVertices();
-    var vArUp = meshUp.getVertices();
-    var cArUp = meshUp.getColors();
-    var mArUp = meshUp.getMaterials();
+    let vArDown = this.getVertices();
+    let cArDown = this.getColors();
+    let mArDown = this.getMaterials();
+    let nbVertices = this.getNbVertices();
+    let vArUp = meshUp.getVertices();
+    let cArUp = meshUp.getColors();
+    let mArUp = meshUp.getMaterials();
 
     if (this.getEvenMapping() === false) {
-      vArDown.set(vArUp.subarray(0, nbVertices * 3));
-      cArDown.set(cArUp.subarray(0, nbVertices * 3));
-      mArDown.set(mArUp.subarray(0, nbVertices * 3));
+      vArDown.set(vArUp.subarray(0, nbVertices*3));
+      cArDown.set(cArUp.subarray(0, nbVertices*3));
+      mArDown.set(mArUp.subarray(0, nbVertices*3));
     } else {
-      var vertMap = this.getVerticesMapping();
-      for (var i = 0; i < nbVertices; ++i) {
-        var id = i * 3;
-        var idUp = vertMap[i] * 3;
+      let vertMap = this.getVerticesMapping();
+      for (let i = 0; i < nbVertices; ++i) {
+        let id = i*3;
+        let idUp = vertMap[i]*3;
         vArDown[id] = vArUp[idUp];
         vArDown[id + 1] = vArUp[idUp + 1];
         vArDown[id + 2] = vArUp[idUp + 2];
@@ -88,28 +89,28 @@ class MeshResolution extends Mesh {
   }
 
   computePartialSubdivision(subdVerts, subdColors, subdMaterials, nbVerticesUp) {
-    var vertMap = this.getVerticesMapping();
+    let vertMap = this.getVerticesMapping();
     if (!vertMap) {
       Subdivision.partialSubdivision(this, subdVerts, subdColors, subdMaterials);
       return;
     }
 
-    var verts = new Float32Array(nbVerticesUp * 3);
-    var colors = new Float32Array(nbVerticesUp * 3);
-    var materials = new Float32Array(nbVerticesUp * 3);
+    let verts = new Float32Array(nbVerticesUp*3);
+    let colors = new Float32Array(nbVerticesUp*3);
+    let materials = new Float32Array(nbVerticesUp*3);
 
     Subdivision.partialSubdivision(this, verts, colors, materials);
 
-    var startMapping = this.getEvenMapping() === true ? 0 : this.getNbVertices();
+    let startMapping = this.getEvenMapping() === true ? 0 : this.getNbVertices();
     if (startMapping > 0) {
-      subdVerts.set(verts.subarray(0, startMapping * 3));
-      subdColors.set(colors.subarray(0, startMapping * 3));
-      subdMaterials.set(materials.subarray(0, startMapping * 3));
+      subdVerts.set(verts.subarray(0, startMapping*3));
+      subdColors.set(colors.subarray(0, startMapping*3));
+      subdMaterials.set(materials.subarray(0, startMapping*3));
     }
 
-    for (var i = startMapping; i < nbVerticesUp; ++i) {
-      var id = i * 3;
-      var idUp = vertMap[i] * 3;
+    for (let i = startMapping; i < nbVerticesUp; ++i) {
+      let id = i*3;
+      let idUp = vertMap[i]*3;
       subdVerts[idUp] = verts[id];
       subdVerts[idUp + 1] = verts[id + 1];
       subdVerts[idUp + 2] = verts[id + 2];
@@ -124,25 +125,25 @@ class MeshResolution extends Mesh {
 
   /** Apply back the detail vectors */
   applyDetails() {
-    var vrvStartCountUp = this.getVerticesRingVertStartCount();
-    var vertRingVertUp = this.getVerticesRingVert();
-    var vArUp = this.getVertices();
-    var nArUp = this.getNormals();
-    var cArUp = this.getColors();
-    var mArUp = this.getMaterials();
-    var nbVerticesUp = this.getNbVertices();
+    let vrvStartCountUp = this.getVerticesRingVertStartCount();
+    let vertRingVertUp = this.getVerticesRingVert();
+    let vArUp = this.getVertices();
+    let nArUp = this.getNormals();
+    let cArUp = this.getColors();
+    let mArUp = this.getMaterials();
+    let nbVerticesUp = this.getNbVertices();
 
-    var vArTemp = new Float32Array(Utils.getMemory(nbVerticesUp * 3 * 4), 0, nbVerticesUp * 3);
-    vArTemp.set(vArUp.subarray(0, nbVerticesUp * 3));
+    let vArTemp = new Float32Array(Utils.getMemory(nbVerticesUp*3*4), 0, nbVerticesUp*3);
+    vArTemp.set(vArUp.subarray(0, nbVerticesUp*3));
 
-    var dAr = this._detailsXYZ;
-    var dColorAr = this._detailsRGB;
-    var dMaterialAr = this._detailsPBR;
+    let dAr = this._detailsXYZ;
+    let dColorAr = this._detailsRGB;
+    let dMaterialAr = this._detailsPBR;
 
-    var min = Math.min;
-    var max = Math.max;
-    for (var i = 0; i < nbVerticesUp; ++i) {
-      var j = i * 3;
+    let min = Math.min;
+    let max = Math.max;
+    for (let i = 0; i < nbVerticesUp; ++i) {
+      let j = i*3;
 
       // color delta vec
       cArUp[j] = min(1.0, max(0.0, cArUp[j] + dColorAr[j]));
@@ -155,78 +156,78 @@ class MeshResolution extends Mesh {
       mArUp[j + 2] = min(1.0, max(0.0, mArUp[j + 2] + dMaterialAr[j + 2]));
 
       // vertex coord
-      var vx = vArTemp[j];
-      var vy = vArTemp[j + 1];
-      var vz = vArTemp[j + 2];
+      let vx = vArTemp[j];
+      let vy = vArTemp[j + 1];
+      let vz = vArTemp[j + 2];
 
       // normal vec
-      var nx = nArUp[j];
-      var ny = nArUp[j + 1];
-      var nz = nArUp[j + 2];
+      let nx = nArUp[j];
+      let ny = nArUp[j + 1];
+      let nz = nArUp[j + 2];
       // normalize vector
-      var len = nx * nx + ny * ny + nz * nz;
+      let len = nx*nx + ny*ny + nz*nz;
       if (len === 0.0)
         continue;
 
-      len = 1.0 / Math.sqrt(len);
+      len = 1.0/Math.sqrt(len);
       nx *= len;
       ny *= len;
       nz *= len;
 
       // tangent vec (vertex neighbor - vertex)
-      var k = vertRingVertUp[vrvStartCountUp[i * 2]] * 3;
-      var tx = vArTemp[k] - vx;
-      var ty = vArTemp[k + 1] - vy;
-      var tz = vArTemp[k + 2] - vz;
+      let k = vertRingVertUp[vrvStartCountUp[i*2]]*3;
+      let tx = vArTemp[k] - vx;
+      let ty = vArTemp[k + 1] - vy;
+      let tz = vArTemp[k + 2] - vz;
       // distance to normal plane
-      len = tx * nx + ty * ny + tz * nz;
+      len = tx*nx + ty*ny + tz*nz;
       // project on normal plane
-      tx -= nx * len;
-      ty -= ny * len;
-      tz -= nz * len;
+      tx -= nx*len;
+      ty -= ny*len;
+      tz -= nz*len;
       // normalize vector
-      len = tx * tx + ty * ty + tz * tz;
+      len = tx*tx + ty*ty + tz*tz;
       if (len === 0.0)
         continue;
 
-      len = 1.0 / Math.sqrt(len);
+      len = 1.0/Math.sqrt(len);
       tx *= len;
       ty *= len;
       tz *= len;
 
       // bi normal/tangent
-      var bix = ny * tz - nz * ty;
-      var biy = nz * tx - nx * tz;
-      var biz = nx * ty - ny * tx;
+      let bix = ny*tz - nz*ty;
+      let biy = nz*tx - nx*tz;
+      let biz = nx*ty - ny*tx;
 
       // displacement/detail vector (object space)
-      var dx = dAr[j];
-      var dy = dAr[j + 1];
-      var dz = dAr[j + 2];
+      let dx = dAr[j];
+      let dy = dAr[j + 1];
+      let dz = dAr[j + 2];
 
       // detail vec in the local frame
-      vArUp[j] = vx + nx * dx + tx * dy + bix * dz;
-      vArUp[j + 1] = vy + ny * dx + ty * dy + biy * dz;
-      vArUp[j + 2] = vz + nz * dx + tz * dy + biz * dz;
+      vArUp[j] = vx + nx*dx + tx*dy + bix*dz;
+      vArUp[j + 1] = vy + ny*dx + ty*dy + biy*dz;
+      vArUp[j + 2] = vz + nz*dx + tz*dy + biz*dz;
     }
   }
 
   /** Compute the detail vectors */
   computeDetails(subdVerts, subdColors, subdMaterials, nbVerticesUp) {
-    var vrvStartCountUp = this.getVerticesRingVertStartCount();
-    var vertRingVertUp = this.getVerticesRingVert();
-    var vArUp = this.getVertices();
-    var nArUp = this.getNormals();
-    var cArUp = this.getColors();
-    var mArUp = this.getMaterials();
-    var nbVertices = this.getNbVertices();
+    let vrvStartCountUp = this.getVerticesRingVertStartCount();
+    let vertRingVertUp = this.getVerticesRingVert();
+    let vArUp = this.getVertices();
+    let nArUp = this.getNormals();
+    let cArUp = this.getColors();
+    let mArUp = this.getMaterials();
+    let nbVertices = this.getNbVertices();
 
-    var dAr = this._detailsXYZ = new Float32Array(nbVerticesUp * 3);
-    var dColorAr = this._detailsRGB = new Float32Array(nbVerticesUp * 3);
-    var dMaterialAr = this._detailsPBR = new Float32Array(nbVerticesUp * 3);
+    let dAr = this._detailsXYZ = new Float32Array(nbVerticesUp*3);
+    let dColorAr = this._detailsRGB = new Float32Array(nbVerticesUp*3);
+    let dMaterialAr = this._detailsPBR = new Float32Array(nbVerticesUp*3);
 
-    for (var i = 0; i < nbVertices; ++i) {
-      var j = i * 3;
+    for (let i = 0; i < nbVertices; ++i) {
+      let j = i*3;
 
       // color delta vec
       dColorAr[j] = cArUp[j] - subdColors[j];
@@ -239,52 +240,52 @@ class MeshResolution extends Mesh {
       dMaterialAr[j + 2] = mArUp[j + 2] - subdMaterials[j + 2];
 
       // normal vec
-      var nx = nArUp[j];
-      var ny = nArUp[j + 1];
-      var nz = nArUp[j + 2];
+      let nx = nArUp[j];
+      let ny = nArUp[j + 1];
+      let nz = nArUp[j + 2];
       // normalize vector
-      var len = nx * nx + ny * ny + nz * nz;
+      let len = nx*nx + ny*ny + nz*nz;
       if (len === 0.0)
         continue;
-      len = 1.0 / Math.sqrt(len);
+      len = 1.0/Math.sqrt(len);
       nx *= len;
       ny *= len;
       nz *= len;
 
       // tangent vec (vertex neighbor - vertex)
-      var k = vertRingVertUp[vrvStartCountUp[i * 2]] * 3;
-      var tx = subdVerts[k] - subdVerts[j];
-      var ty = subdVerts[k + 1] - subdVerts[j + 1];
-      var tz = subdVerts[k + 2] - subdVerts[j + 2];
+      let k = vertRingVertUp[vrvStartCountUp[i*2]]*3;
+      let tx = subdVerts[k] - subdVerts[j];
+      let ty = subdVerts[k + 1] - subdVerts[j + 1];
+      let tz = subdVerts[k + 2] - subdVerts[j + 2];
       // distance to normal plane
-      len = tx * nx + ty * ny + tz * nz;
+      len = tx*nx + ty*ny + tz*nz;
       // project on normal plane
-      tx -= nx * len;
-      ty -= ny * len;
-      tz -= nz * len;
+      tx -= nx*len;
+      ty -= ny*len;
+      tz -= nz*len;
       // normalize vector
-      len = tx * tx + ty * ty + tz * tz;
+      len = tx*tx + ty*ty + tz*tz;
       if (len === 0.0)
         continue;
-      len = 1.0 / Math.sqrt(len);
+      len = 1.0/Math.sqrt(len);
       tx *= len;
       ty *= len;
       tz *= len;
 
       // bi normal/tangent
-      var bix = ny * tz - nz * ty;
-      var biy = nz * tx - nx * tz;
-      var biz = nx * ty - ny * tx;
+      let bix = ny*tz - nz*ty;
+      let biy = nz*tx - nx*tz;
+      let biz = nx*ty - ny*tx;
 
       // displacement/detail vector (object space)
-      var dx = vArUp[j] - subdVerts[j];
-      var dy = vArUp[j + 1] - subdVerts[j + 1];
-      var dz = vArUp[j + 2] - subdVerts[j + 2];
+      let dx = vArUp[j] - subdVerts[j];
+      let dy = vArUp[j + 1] - subdVerts[j + 1];
+      let dz = vArUp[j + 2] - subdVerts[j + 2];
 
       // order : n/t/bi
-      dAr[j] = nx * dx + ny * dy + nz * dz;
-      dAr[j + 1] = tx * dx + ty * dy + tz * dz;
-      dAr[j + 2] = bix * dx + biy * dy + biz * dz;
+      dAr[j] = nx*dx + ny*dy + nz*dz;
+      dAr[j + 1] = tx*dx + ty*dy + tz*dz;
+      dAr[j + 2] = bix*dx + biy*dy + biz*dz;
     }
   }
 }

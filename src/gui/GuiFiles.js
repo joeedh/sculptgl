@@ -1,12 +1,12 @@
-import TR from 'gui/GuiTR';
-import { saveAs } from 'file-saver';
-import { zip } from 'zip';
-import Export from 'files/Export';
+import TR from './GuiTR.js';
+import {saveAs} from '../lib/file-saver.js';
+import {zip} from '../lib/zip.js';
+import Export from '../files/Export.js';
 
-import Rtt from 'drawables/Rtt';
-import ShaderPaintUV from 'render/shaders/ShaderPaintUV';
-import ShaderBlur from 'render/shaders/ShaderBlur';
-import Enums from 'misc/Enums';
+import Rtt from '../drawables/Rtt.js';
+import ShaderPaintUV from '../render/shaders/ShaderPaintUV.js';
+import ShaderBlur from '../render/shaders/ShaderBlur.js';
+import Enums from '../misc/Enums.js';
 
 class GuiFiles {
 
@@ -23,11 +23,11 @@ class GuiFiles {
   }
 
   init(guiParent) {
-    var menu = this._menu = guiParent.addMenu(TR('fileTitle'));
+    let menu = this._menu = guiParent.addMenu(TR('fileTitle'));
 
     // import
     menu.addTitle(TR('fileImportTitle'));
-    menu.addButton(TR('fileAdd'), this, 'addFile' /*, 'CTRL+O/I'*/ );
+    menu.addButton(TR('fileAdd'), this, 'addFile' /*, 'CTRL+O/I'*/);
     menu.addCheckbox(TR('fileAutoMatrix'), this._main, '_autoMatrix');
     menu.addCheckbox(TR('fileVertexSRGB'), this._main, '_vertexSRGB');
 
@@ -35,7 +35,7 @@ class GuiFiles {
     menu.addTitle(TR('fileExportSceneTitle'));
     menu.addCheckbox(TR('fileExportAll'), this, '_exportAll');
     menu.addButton(TR('fileExportSGL'), this, 'saveFileAsSGL');
-    menu.addButton(TR('fileExportOBJ'), this, 'saveFileAsOBJ' /*, 'CTRL+E'*/ );
+    menu.addButton(TR('fileExportOBJ'), this, 'saveFileAsOBJ' /*, 'CTRL+E'*/);
     menu.addButton(TR('fileExportPLY'), this, 'saveFileAsPLY');
     menu.addButton(TR('fileExportSTL'), this, 'saveFileAsSTL');
     menu.addCheckbox('OBJ color zbrush', this, '_objColorZbrush');
@@ -56,24 +56,24 @@ class GuiFiles {
   }
 
   onTextureSize(value) {
-    this._texSize = 1 << value;
+    this._texSize = 1<<value;
     this._guiTexSize.domInputText.value = this._texSize;
   }
 
   _getExportMeshes() {
     if (this._exportAll) return this._main.getMeshes();
-    var selected = this._main.getSelectedMeshes();
+    let selected = this._main.getSelectedMeshes();
     return selected.length ? selected : undefined;
   }
 
   _extractTexture(gl, width, height) {
-    var canvas = document.createElement('canvas');
+    let canvas = document.createElement('canvas');
     canvas.width = width;
     canvas.height = height;
 
-    var pixels = new Uint8Array(4 * width * height);
+    let pixels = new Uint8Array(4*width*height);
 
-    var status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
+    let status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
     if (status !== gl.FRAMEBUFFER_COMPLETE) {
       console.error('FRAMEBUFFER not complete');
       return canvas;
@@ -84,8 +84,8 @@ class GuiFiles {
     gl.readPixels(0, 0, width, height, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
 
     // copy pixels to canvas pixels (inverted image)
-    var ctx = canvas.getContext('2d');
-    var imageData = ctx.getImageData(0, 0, width, height);
+    let ctx = canvas.getContext('2d');
+    let imageData = ctx.getImageData(0, 0, width, height);
     imageData.data.set(pixels);
     ctx.putImageData(imageData, 0, 0);
 
@@ -110,7 +110,7 @@ class GuiFiles {
   }
 
   _saveTexture(filename) {
-    var mesh = this._main.getMesh();
+    let mesh = this._main.getMesh();
     if (!mesh) {
       return;
     }
@@ -120,15 +120,15 @@ class GuiFiles {
       return;
     }
 
-    var gl = mesh.getGL();
+    let gl = mesh.getGL();
 
-    var width = this._texSize;
-    var height = this._texSize;
+    let width = this._texSize;
+    let height = this._texSize;
 
-    var tmpShaderType = mesh.getShaderType();
+    let tmpShaderType = mesh.getShaderType();
     mesh.setShaderType(Enums.Shader.PAINTUV);
 
-    var rttPaint = this._getRttPaint(gl);
+    let rttPaint = this._getRttPaint(gl);
     rttPaint.onResize(width, height);
     gl.bindFramebuffer(gl.FRAMEBUFFER, rttPaint.getFramebuffer());
     gl.clear(gl.COLOR_BUFFER_BIT);
@@ -140,7 +140,7 @@ class GuiFiles {
 
     this._blurImage(gl, width, height);
 
-    var canvas = this._extractTexture(gl, width, height);
+    let canvas = this._extractTexture(gl, width, height);
     canvas.toBlob(function (blob) {
       saveAs(blob, filename + '.png');
     }.bind(this));
@@ -150,7 +150,7 @@ class GuiFiles {
   }
 
   _blurImage(gl, width, height) {
-    var rttBlur = this._getRttBlur(gl);
+    let rttBlur = this._getRttBlur(gl);
     rttBlur.onResize(width, height);
     gl.bindFramebuffer(gl.FRAMEBUFFER, rttBlur.getFramebuffer());
     gl.clear(gl.COLOR_BUFFER_BIT);
@@ -174,25 +174,25 @@ class GuiFiles {
   }
 
   saveFileAsSGL() {
-    var meshes = this._getExportMeshes();
+    let meshes = this._getExportMeshes();
     if (!meshes) return;
     this._save(Export.exportSGL(meshes, this._main), 'yourMesh.sgl');
   }
 
   saveFileAsOBJ() {
-    var meshes = this._getExportMeshes();
+    let meshes = this._getExportMeshes();
     if (!meshes) return;
     this._save(Export.exportOBJ(meshes, this._objColorZbrush, this._objColorAppended), 'yourMesh.obj');
   }
 
   saveFileAsPLY() {
-    var meshes = this._getExportMeshes();
+    let meshes = this._getExportMeshes();
     if (!meshes) return;
     this._save(Export.exportBinaryPLY(meshes), 'yourMesh.ply');
   }
 
   saveFileAsSTL() {
-    var meshes = this._getExportMeshes();
+    let meshes = this._getExportMeshes();
     if (!meshes) return;
     this._save(Export.exportBinarySTL(meshes), 'yourMesh.stl');
   }
@@ -222,7 +222,7 @@ class GuiFiles {
     if (!this._main._focusGui)
       event.preventDefault();
 
-    var key = event.which;
+    let key = event.which;
     if (event.ctrlKey && event.altKey && key === 78) { // N
       this._main.clearScene();
       event.handled = true;

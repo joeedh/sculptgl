@@ -1,18 +1,17 @@
-import { mat3, mat4, vec3 } from 'gl-matrix';
-import Buffer from 'render/Buffer';
-import ShaderLib from 'render/ShaderLib';
-import Enums from 'misc/Enums';
+import {mat3, mat4, vec3} from '../lib/gl-matrix.js';
+import Buffer from '../render/Buffer.js';
+import ShaderLib from '../render/ShaderLib.js';
+import Enums from '../misc/Enums.js';
 
-var _TMP_MATPV = mat4.create();
-var _TMP_MAT = mat4.create();
-var _TMP_VEC = [0.0, 0.0, 0.0];
-var _TMP_AXIS = [0.0, 0.0, 0.0];
-var _BASE = [0.0, 0.0, 1.0];
+let _TMP_MATPV = mat4.create();
+let _TMP_MAT = mat4.create();
+let _TMP_VEC = [0.0, 0.0, 0.0];
+let _TMP_AXIS = [0.0, 0.0, 0.0];
+let _BASE = [0.0, 0.0, 1.0];
 
-var DOT_RADIUS = 50.0;
+let DOT_RADIUS = 50.0;
 
 class Selection {
-
   constructor(gl) {
     this._gl = gl;
 
@@ -85,16 +84,16 @@ class Selection {
   }
 
   _getCircleVertices(radius = 1.0, nbVertices = 50, full = false) {
-    var arc = Math.PI * 2;
+    let arc = Math.PI*2;
 
-    var start = full ? 1 : 0;
-    var end = full ? nbVertices + 2 : nbVertices;
-    var vertices = new Float32Array(end * 3);
-    for (var i = start; i < end; ++i) {
-      var j = i * 3;
-      var segment = (arc * i) / nbVertices;
-      vertices[j] = Math.cos(segment) * radius;
-      vertices[j + 1] = Math.sin(segment) * radius;
+    let start = full ? 1 : 0;
+    let end = full ? nbVertices + 2 : nbVertices;
+    let vertices = new Float32Array(end*3);
+    for (let i = start; i < end; ++i) {
+      let j = i*3;
+      let segment = (arc*i)/nbVertices;
+      vertices[j] = Math.cos(segment)*radius;
+      vertices[j + 1] = Math.sin(segment)*radius;
     }
     return vertices;
   }
@@ -105,10 +104,10 @@ class Selection {
 
   _updateMatricesBackground(camera, main) {
 
-    var screenRadius = main.getSculptManager().getCurrentTool().getScreenRadius();
+    let screenRadius = main.getSculptManager().getCurrentTool().getScreenRadius();
 
-    var w = camera._width * 0.5;
-    var h = camera._height * 0.5;
+    let w = camera._width*0.5;
+    let h = camera._height*0.5;
     // no need to recompute the ortho proj each time though
     mat4.ortho(_TMP_MATPV, -w, w, -h, h, -10.0, 10.0);
 
@@ -125,18 +124,18 @@ class Selection {
   }
 
   _updateMatricesMesh(camera, main) {
-    var picking = main.getPicking();
-    var pickingSym = main.getPickingSymmetry();
-    var worldRadius = Math.sqrt(picking.computeWorldRadius2(true));
-    var screenRadius = main.getSculptManager().getCurrentTool().getScreenRadius();
+    let picking = main.getPicking();
+    let pickingSym = main.getPickingSymmetry();
+    let worldRadius = Math.sqrt(picking.computeWorldRadius2(true));
+    let screenRadius = main.getSculptManager().getCurrentTool().getScreenRadius();
 
-    var mesh = picking.getMesh();
-    var constRadius = DOT_RADIUS * (worldRadius / screenRadius);
+    let mesh = picking.getMesh();
+    let constRadius = DOT_RADIUS*(worldRadius/screenRadius);
 
     picking.polyLerp(mesh.getNormals(), _TMP_AXIS);
     vec3.transformMat3(_TMP_AXIS, _TMP_AXIS, mat3.normalFromMat4(_TMP_MAT, mesh.getMatrix()));
     vec3.normalize(_TMP_AXIS, _TMP_AXIS);
-    var rad = Math.acos(vec3.dot(_BASE, _TMP_AXIS));
+    let rad = Math.acos(vec3.dot(_BASE, _TMP_AXIS));
     vec3.cross(_TMP_AXIS, _BASE, _TMP_AXIS);
 
     mat4.identity(_TMP_MAT);
@@ -163,11 +162,11 @@ class Selection {
 
   render(main) {
     // if there's an offset then it means we are editing the tool radius
-    var pickedMesh = main.getPicking().getMesh() && !this._isEditMode;
+    let pickedMesh = main.getPicking().getMesh() && !this._isEditMode;
     if (pickedMesh) this._updateMatricesMesh(main.getCamera(), main);
     else this._updateMatricesBackground(main.getCamera(), main);
 
-    var drawCircle = main._action === Enums.Action.NOTHING;
+    let drawCircle = main._action === Enums.Action.NOTHING;
     vec3.set(this._color, 0.8, drawCircle && pickedMesh ? 0.0 : 0.4, 0.0);
     ShaderLib[Enums.Shader.SELECTION].getOrCreate(this._gl).draw(this, drawCircle, main.getSculptManager().getSymmetry());
 
